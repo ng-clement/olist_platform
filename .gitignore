@@ -1,0 +1,73 @@
+# =============================================================================
+# Olist Analytics Platform — .gitignore
+# =============================================================================
+
+# ── Secrets & credentials ─────────────────────────────────────────────────────
+.env
+*.json
+!package*.json
+!dbt_project/packages.yml
+!dbt_project/package-lock.yml
+olist-analytics-gcp-key.json
+*-key.json
+*-credentials.json
+service_account*.json
+docs/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+.eggs/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+!notebooks/**/*.ipynb
+
+# ── DBT ───────────────────────────────────────────────────────────────────────
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+
+# ── Data files — never commit raw data ───────────────────────────────────────
+data/raw/*.csv
+data/warehouse_sim/
+*.parquet
+*.jsonl
+
+# ── Logs & reports ────────────────────────────────────────────────────────────
+logs/
+*.log
+reports/charts/*.png
+reports/charts/*.svg
+
+# ── OS & editor ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+*.Zone.Identifier
+*.docx
+*.pdf
+
+# ── Airflow ───────────────────────────────────────────────────────────────────
+airflow_home/
+airflow.db
+airflow.cfg
+webserver_config.py
