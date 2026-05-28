@@ -1,0 +1,49 @@
+name: 'olist_analytics'
+version: '1.0.0'
+config-version: 2
+
+profile: 'olist_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  project_start_date: '2016-01-01'
+  project_end_date: '2018-12-31'
+  delivery_sla_days: 15
+
+models:
+  olist_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ['staging']
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ['mart']
+      core:
+        +materialized: table
+      marketing:
+        +materialized: table
+      customer:
+        +materialized: table
+      seller:
+        +materialized: table
+      logistics:
+        +materialized: incremental
+        +incremental_strategy: merge
+      product:
+        +materialized: table
+      geography:
+        +materialized: incremental
+        +incremental_strategy: merge

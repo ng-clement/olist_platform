@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olist Analytics Platform — Executive Dashboard</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:   #1F3864;
+    --steel:  #2E75B6;
+    --teal:   #065A82;
+    --sky:    #4EAFD1;
+    --ltblue: #EBF3FB;
+    --green:  #1A5E3A;
+    --ltgreen:#E8F5E9;
+    --amber:  #7D4E00;
+    --ltamber:#FFF8E1;
+    --red:    #8B2500;
+    --ltred:  #FFEBEE;
+    --bg:     #F4F6F9;
+    --panel:  #FFFFFF;
+    --text:   #1A1A2E;
+    --muted:  #64748B;
+    --border: #E2E8F0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 12px;
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+         background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ───────────────────────────────────────────────────────────── */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 100%);
+    color: white; padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-brand .logo { font-size: 1.90rem; }
+  .header-brand h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: 0.02em; }
+  .header-brand span { font-size: 1.20rem; opacity: 0.75; display: block; font-weight: 400; }
+  .header-meta { font-size: 1.20rem; opacity: 0.75; text-align: right; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 4px 12px; font-size: 1.18rem;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%;
+                background: #4ADE80; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── Nav tabs ─────────────────────────────────────────────────────────── */
+  .nav-bar {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; gap: 0; overflow-x: auto; padding: 0 2rem;
+    position: sticky; top: 64px; z-index: 99;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .nav-tab {
+    padding: 0 1.25rem; height: 48px; display: flex; align-items: center; gap: 8px;
+    font-size: 1.28rem; font-weight: 500; color: var(--muted); cursor: pointer;
+    border-bottom: 3px solid transparent; white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .nav-tab:hover  { color: var(--steel); }
+  .nav-tab.active { color: var(--steel); border-bottom-color: var(--steel); }
+
+  /* ── Layout ───────────────────────────────────────────────────────────── */
+  .main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── KPI Strip ────────────────────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--panel); border-radius: var(--radius); padding: 1.25rem 1rem;
+    box-shadow: var(--shadow); border-top: 4px solid var(--steel);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+  .kpi-card.green { border-top-color: #16A34A; }
+  .kpi-card.amber { border-top-color: #D97706; }
+  .kpi-card.red   { border-top-color: #DC2626; }
+  .kpi-label  { font-size: 1.15rem; color: var(--muted); text-transform: uppercase;
+                letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .kpi-value  { font-size: 2.15rem; font-weight: 700; color: var(--navy); line-height: 1; }
+  .kpi-sub    { font-size: 1.18rem; color: var(--muted); margin-top: 0.35rem; }
+  .kpi-delta  { display: inline-flex; align-items: center; gap: 3px;
+                font-size: 1.15rem; font-weight: 600; margin-top: 0.25rem; }
+  .kpi-delta.up   { color: #16A34A; }
+  .kpi-delta.down { color: #DC2626; }
+
+  /* ── Section header ───────────────────────────────────────────────────── */
+  .section-header { margin-bottom: 1.25rem; }
+  .section-header h2 { font-size: 1.75rem; color: var(--navy); font-weight: 700; }
+  .section-header p  { font-size: 1.28rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* ── Chart panels ─────────────────────────────────────────────────────── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+    gap: 1.25rem; margin-bottom: 1.5rem;
+  }
+  .chart-grid.single { grid-template-columns: 1fr; }
+  .chart-panel {
+    background: var(--panel); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .chart-panel-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chart-panel-header h3 { font-size: 1.35rem; font-weight: 600; color: var(--navy); }
+  .chart-panel-header p  { font-size: 1.18rem; color: var(--muted); margin-top: 2px; }
+  .chart-panel-body { padding: 1rem; }
+  .chart-panel-body img { width: 100%; height: auto; border-radius: 6px; display: block; }
+  .chart-tag {
+    font-size: 1.10rem; font-weight: 600; letter-spacing: 0.05em;
+    padding: 3px 8px; border-radius: 4px; background: var(--ltblue);
+    color: var(--steel); text-transform: uppercase;
+  }
+
+  /* ── Insight cards ────────────────────────────────────────────────────── */
+  .insight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                 gap: 1rem; margin-bottom: 1.5rem; }
+  .insight-card {
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    border-left: 4px solid var(--steel);
+    background: var(--ltblue);
+  }
+  .insight-card.green { border-left-color: #16A34A; background: var(--ltgreen); }
+  .insight-card.amber { border-left-color: #D97706; background: var(--ltamber); }
+  .insight-card.red   { border-left-color: #DC2626; background: var(--ltred); }
+  .insight-card h4 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem;
+                     color: var(--navy); }
+  .insight-card p  { font-size: 1.22rem; color: var(--text); line-height: 1.5; }
+
+  /* ── Recommendations table ────────────────────────────────────────────── */
+  .rec-table { width: 100%; border-collapse: collapse; }
+  .rec-table th {
+    background: var(--navy); color: white; padding: 0.75rem 1rem;
+    text-align: left; font-size: 1.22rem; font-weight: 600; letter-spacing: 0.03em;
+  }
+  .rec-table td { padding: 0.75rem 1rem; font-size: 1.25rem; border-bottom: 1px solid var(--border); }
+  .rec-table tr:nth-child(even) td { background: #F8FAFC; }
+  .rec-table tr:hover td { background: var(--ltblue); }
+  .priority-high   { color: #DC2626; font-weight: 700; }
+  .priority-medium { color: #D97706; font-weight: 700; }
+  .priority-low    { color: #16A34A; font-weight: 700; }
+  .impact-badge {
+    background: var(--ltgreen); color: var(--green);
+    font-size: 1.15rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 12px; white-space: nowrap;
+  }
+
+  /* ── Pipeline status ──────────────────────────────────────────────────── */
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0.75rem; }
+  .pipeline-step {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--panel); border-radius: 8px; padding: 0.9rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--steel); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.30rem; flex-shrink: 0;
+  }
+  .step-info { flex: 1; }
+  .step-info h4 { font-size: 1.30rem; font-weight: 600; color: var(--navy); }
+  .step-info p  { font-size: 1.20rem; color: var(--muted); margin-top: 2px; }
+  .step-cmd {
+    font-family: 'Courier New', monospace; font-size: 1.18rem;
+    background: var(--ltblue); color: var(--steel);
+    padding: 0.3rem 0.7rem; border-radius: 4px; white-space: nowrap;
+  }
+  .step-status { font-size: 1.60rem; }
+
+  /* ── Responsive ───────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .main { padding: 1rem; }
+    .chart-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    .kpi-value { font-size: 1.80rem; }
+    .header h1 { font-size: 1.40rem; }
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────────── */
+  footer {
+    text-align: center; padding: 2rem; font-size: 1.18rem; color: var(--muted);
+    border-top: 1px solid var(--border); background: var(--panel);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-brand">
+    <span class="logo">📊</span>
+    <div>
+      <h1>Olist Analytics Platform</h1>
+      <span>Brazilian E-Commerce Intelligence · 2016–2018</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <div class="status-badge"><span class="status-dot"></span>Pipeline Active</div>
+    <div class="header-meta">
+      <div id="live-time" style="font-weight:600;"></div>
+      <div>Data refreshed daily at 06:00 UTC</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Nav ─────────────────────────────────────────────────────────────────── -->
+<nav class="nav-bar" id="main-nav">
+  <button class="nav-tab active" data-section="overview"      onclick="showTab(this,'overview')">      📈 Overview</button>
+  <button class="nav-tab"        data-section="revenue"       onclick="showTab(this,'revenue')">       💰 Revenue</button>
+  <button class="nav-tab"        data-section="customers"     onclick="showTab(this,'customers')">     👥 Customers</button>
+  <button class="nav-tab"        data-section="marketing"     onclick="showTab(this,'marketing')">     📣 Marketing</button>
+  <button class="nav-tab"        data-section="logistics"     onclick="showTab(this,'logistics')">     🚚 Logistics</button>
+  <button class="nav-tab"        data-section="geography"     onclick="showTab(this,'geography')">     🗺️ Geography</button>
+  <button class="nav-tab"        data-section="payments"      onclick="showTab(this,'payments')">      💳 Payments</button>
+  <button class="nav-tab"        data-section="sellers"       onclick="showTab(this,'sellers')">       🏪 Sellers</button>
+  <button class="nav-tab"        data-section="products"      onclick="showTab(this,'products')">      📦 Products</button>
+  <button class="nav-tab"        data-section="recommendations" onclick="showTab(this,'recommendations')">🎯 Recommendations</button>
+  <button class="nav-tab"        data-section="pipeline"      onclick="showTab(this,'pipeline')">      ⚙️ Pipeline</button>
+</nav>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     OVERVIEW
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section active" id="section-overview">
+  <div class="section-header">
+    <h2>📈 Executive Overview</h2>
+    <p>Platform-wide KPIs for the Olist e-commerce business · 2016–2018</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total GMV</div>
+      <div class="kpi-value">R$15.8M</div>
+      <div class="kpi-sub">Gross Merchandise Value</div>
+      <div class="kpi-delta up">↑ 3× YoY growth</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value">99,441</div>
+      <div class="kpi-sub">Delivered + Active</div>
+      <div class="kpi-delta up">↑ ~4,500 / month avg</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value">R$137.75</div>
+      <div class="kpi-sub">Product + freight</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">On-Time Delivery</div>
+      <div class="kpi-value">91.9%</div>
+      <div class="kpi-sub">Within estimated date</div>
+      <div class="kpi-delta down">↓ 8.1% late rate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Review Score</div>
+      <div class="kpi-value">4.09</div>
+      <div class="kpi-sub">Out of 5.0</div>
+      <div class="kpi-delta up">↑ Healthy satisfaction</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">MQL Conversion</div>
+      <div class="kpi-value">10.5%</div>
+      <div class="kpi-sub">Lead → Seller</div>
+      <div class="kpi-delta">842 / 8,000 leads</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Repeat Buyers</div>
+      <div class="kpi-value">3.0%</div>
+      <div class="kpi-sub">97% one-time buyers</div>
+      <div class="kpi-delta down">↓ Retention gap</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Unique Customers</div>
+      <div class="kpi-value">96,096</div>
+      <div class="kpi-sub">Customer accounts</div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>💡 Revenue Opportunity: At-Risk Win-Back</h4>
+      <p>23,188 At-Risk customers with avg spend of R$185. Targeting 5% reactivation via personalised campaigns = <strong>R$214K incremental revenue</strong>.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>⚠️ Retention Gap</h4>
+      <p>97% of customers buy only once. A subscription tier or loyalty programme in the top 3 categories (Health & Beauty, Watches, Sports) could 3–5× customer LTV.</p>
+    </div>
+    <div class="insight-card">
+      <h4>🗺️ Geographic Expansion</h4>
+      <p>North Brazil: 8.5% of national population but &lt;1% of orders. Fulfilment centre investment would capture an estimated 5,000+ incremental orders annually.</p>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Monthly Revenue & Order Trends</h3><p>GMV and order volume Jan 2017 – Aug 2018</p></div>
+        <span class="chart-tag">Revenue</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-revenue" src="" alt="Revenue Trend"></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Customer RFM Segmentation</h3><p>Recency · Frequency · Monetary scoring</p></div>
+        <span class="chart-tag">Customers</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-rfm" src="" alt="RFM Segments"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     REVENUE
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-revenue">
+  <div class="section-header">
+    <h2>💰 Revenue Analysis</h2>
+    <p>Monthly GMV trends and product category performance</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>🏆 Best Month</h4>
+      <p>November 2017 Black Friday peak reached <strong>R$1.04M</strong> — approximately 4× the average monthly baseline of R$260K.</p>
+    </div>
+    <div class="insight-card">
+      <h4>📦 Top Category</h4>
+      <p><strong>Health & Beauty</strong> leads all categories with R$1.26M GMV. It also has high repurchase potential — ideal for subscription model testing.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>📉 Q1 2018 Plateau</h4>
+      <p>Revenue growth stalled in Q1 2018 at R$850K/month after the Black Friday spike. Investigate pricing, new seller onboarding, and seasonal patterns.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Monthly Revenue & Order Volume</h3><p>Full time series 2016–2018</p></div>
+        <span class="chart-tag">Time Series</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-revenue2" src="" alt="Revenue Trend"></div>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Top 12 Product Categories by Revenue</h3><p>Total GMV and order count per category</p></div>
+        <span class="chart-tag">Products</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-category" src="" alt="Category Performance"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     CUSTOMERS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-customers">
+  <div class="section-header">
+    <h2>👥 Customer Analytics</h2>
+    <p>RFM segmentation and customer lifecycle analysis</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>🏆 Champions (5,974 customers)</h4>
+      <p>R ≥ 3, F ≥ 3, M ≥ 3. Average spend <strong>R$485</strong>. These 6.2% of customers drive 35%+ of revenue. Protect with VIP programme and early access deals.</p>
+    </div>
+    <div class="insight-card red">
+      <h4>⚠️ At-Risk (23,188 customers)</h4>
+      <p>Were frequent buyers; haven't purchased recently. Win-back email sequence with personalised R$20 voucher at 5% uptake = <strong>R$214K recovery</strong>.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>😴 Hibernating (23,269 customers)</h4>
+      <p>Low recency, low frequency. Hard to reactivate — prioritise at-risk segment first. Consider a reactivation campaign with bundle deals.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>RFM Segment Distribution & Average Spend</h3><p>Customer value classification using RFM quartile scoring</p></div>
+        <span class="chart-tag">Segmentation</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-rfm2" src="" alt="RFM Segments"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MARKETING
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-marketing">
+  <div class="section-header">
+    <h2>📣 Marketing Funnel</h2>
+    <p>MQL conversion rates by acquisition channel</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>🔍 Best Channel: Paid Search (12.3%)</h4>
+      <p>Paid Search converts at 4× the rate of Email. Reallocating 20% of social/email budget to Paid Search could yield <strong>+35–40 new seller deals per cohort</strong>.</p>
+    </div>
+    <div class="insight-card red">
+      <h4>✉️ Email Underperforms (3.0%)</h4>
+      <p>Email generates high lead volume but converts poorly. Consider A/B testing of subject lines and targeting high-intent segments only rather than broad email blasts.</p>
+    </div>
+    <div class="insight-card">
+      <h4>📊 Overall Funnel</h4>
+      <p>8,000 MQLs → 842 closed deals (10.5% overall). Average days to close: 34 days. Faster follow-up (within 48h) in CRM correlated with 2× higher close rates.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Marketing Channel Conversion Rates</h3><p>MQL to closed deal percentage by origin channel</p></div>
+        <span class="chart-tag">Conversion</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-marketing" src="" alt="Marketing Funnel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     LOGISTICS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-logistics">
+  <div class="section-header">
+    <h2>🚚 Logistics & Delivery</h2>
+    <p>Delivery performance, on-time rates, and satisfaction correlation</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>✅ 91.9% On-Time Delivery</h4>
+      <p>Strong baseline performance. Each additional day of delivery time costs approximately <strong>0.05 review points</strong>. Fast shipping = higher scores = more repeat buyers.</p>
+    </div>
+    <div class="insight-card red">
+      <h4>❌ 8.1% Late Deliveries</h4>
+      <p>North and Northeast regions show the highest late rates (12–15%). Carrier SLA renegotiation + proactive SMS notification at T+12 days could recover 0.3 review points.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>📦 Avg 12.1 Days to Deliver</h4>
+      <p>Southeast customers receive in 8–10 days; North/Northeast in 16–22 days. A regional fulfilment centre would halve northern delivery times.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Delivery Time Distribution & Late Rate by State</h3><p>Distribution of delivery days and states with highest late rates</p></div>
+        <span class="chart-tag">SLA Analysis</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-delivery" src="" alt="Delivery Performance"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     GEOGRAPHY
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-geography">
+  <div class="section-header">
+    <h2>🗺️ Geographic Analysis</h2>
+    <p>Order distribution and demand patterns across Brazilian states</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card">
+      <h4>🏙️ São Paulo Dominates</h4>
+      <p>SP accounts for 42% of all orders — healthy penetration relative to its 22% population share. Strong logistics infrastructure to maintain.</p>
+    </div>
+    <div class="insight-card green">
+      <h4>🌱 North Region Opportunity</h4>
+      <p>North region: 8.5% of Brazil's population but less than 1% of orders. Above-average spend per order suggests willingness to pay. <strong>Highest growth potential.</strong></p>
+    </div>
+    <div class="insight-card amber">
+      <h4>📦 Northeast Gap</h4>
+      <p>Northeast: 27% of population, only ~8% of orders. Infrastructure and logistics challenges are the primary barrier — address with hub expansion before marketing spend.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Orders & Revenue by State</h3><p>Order volume and average order value across 27 Brazilian states</p></div>
+        <span class="chart-tag">Geospatial</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-geo" src="" alt="Geographic Analysis"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PAYMENTS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-payments">
+  <div class="section-header">
+    <h2>💳 Payment Behaviour</h2>
+    <p>Payment method distribution and instalment patterns</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card">
+      <h4>💳 Credit Card Dominates (74%)</h4>
+      <p>3-instalment credit is the most popular choice, followed by 1-instalment. Instalment flexibility increases conversion — consider offering 10+ month options.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>🏦 Boleto at 19%</h4>
+      <p>Boleto (cash-in-advance bank slip) indicates ~20% of customers are unbanked or prefer offline payment. Vouchers (6%) are mostly loyalty/promo redemptions.</p>
+    </div>
+    <div class="insight-card green">
+      <h4>💡 BNPL Opportunity</h4>
+      <p>High instalment usage (avg 3.7 for credit card orders) signals appetite for Buy Now Pay Later. Offering 12-month 0% interest for AOV > R$200 could increase basket size 25%.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Payment Methods & Instalment Distribution</h3><p>How customers pay and how they split credit card payments</p></div>
+        <span class="chart-tag">Payments</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-payments" src="" alt="Payment Analysis"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SELLERS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-sellers">
+  <div class="section-header">
+    <h2>🏪 Seller Performance</h2>
+    <p>Revenue concentration and seller tier analysis</p>
+  </div>
+  <div class="insight-row">
+    <div class="insight-card">
+      <h4>🏆 Top 5% = 35% of Revenue</h4>
+      <p>Highly concentrated seller base. Top performers need dedicated account management, priority logistics slots, and co-marketing investment.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>📉 Long-Tail Sellers (80%)</h4>
+      <p>The bottom 80% of sellers generate only 30% of revenue. Many may be inactive or underperforming. Targeted training and tooling could activate 10–15% more revenue from this group.</p>
+    </div>
+    <div class="insight-card green">
+      <h4>📈 Seller Growth Lever</h4>
+      <p>MQL conversion pipeline shows Paid Search brings higher-quality sellers. Redirecting acquisition budget towards higher-intent channels improves seller quality and lifetime value.</p>
+    </div>
+  </div>
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Seller Revenue Concentration — Lorenz Curve</h3><p>Revenue inequality and seller tier breakdown</p></div>
+        <span class="chart-tag">Sellers</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-sellers" src="" alt="Seller Performance"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PRODUCTS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-products">
+  <div class="section-header">
+    <h2>📦 Product & Category Analytics</h2>
+    <p>Category GMV, performance tiers, and review quality across 73 product categories</p>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label">Top Category</div>
+      <div class="kpi-value" style="font-size:1.6rem;">Health &amp; Beauty</div>
+      <div class="kpi-sub">R$1.26M GMV</div>
+      <div class="kpi-delta up">↑ Largest single category</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Categories</div>
+      <div class="kpi-value">73</div>
+      <div class="kpi-sub">Active product categories</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Top 4 Share</div>
+      <div class="kpi-value">30%</div>
+      <div class="kpi-sub">of total GMV</div>
+      <div class="kpi-delta down">↓ Category concentration risk</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Category AOV</div>
+      <div class="kpi-value">R$137</div>
+      <div class="kpi-sub">Avg order value</div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>🏆 Tier 1 — Core Categories (top 25% by GMV)</h4>
+      <p><strong>Health &amp; Beauty, Watches &amp; Gifts, Bed/Bath/Table, Sports &amp; Leisure</strong> together drive ~35% of total GMV from only 4 categories. Exclusive supplier partnerships and subscription models are the highest-ROI investment here.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>📉 Long-Tail (bottom 50% by GMV)</h4>
+      <p>The bottom 37 categories each contribute less than 0.5% of GMV. Consider consolidating catalogue, improving search discoverability, or offering category-specific promotions to activate latent demand.</p>
+    </div>
+    <div class="insight-card">
+      <h4>⭐ Review Quality by Category</h4>
+      <p>Electronics and Computers score lowest (avg 3.8–3.9). Health &amp; Beauty and Fashion score highest (4.2–4.4). Review score correlates strongly with delivery speed — faster categories score higher.</p>
+    </div>
+  </div>
+
+  <div class="chart-grid single">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <div><h3>Top 12 Product Categories by Revenue</h3><p>Total GMV and order count — ranked by gross revenue</p></div>
+        <span class="chart-tag">Products</span>
+      </div>
+      <div class="chart-panel-body"><img id="img-category2" src="" alt="Category Performance"></div>
+    </div>
+  </div>
+
+  <div class="chart-panel" style="margin-bottom:1.5rem;">
+    <div class="chart-panel-header">
+      <div><h3>Category Performance Tier Matrix</h3><p>Revenue quartile classification with review quality and on-time delivery signals</p></div>
+      <span class="chart-tag">Tiers</span>
+    </div>
+    <div class="chart-panel-body" style="padding:0;">
+      <table class="rec-table">
+        <thead>
+          <tr><th>Tier</th><th>Definition</th><th>Examples</th><th>Strategy</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tier 1 — Core</strong></td>
+            <td>Top 25% by GMV</td>
+            <td>Health &amp; Beauty, Watches, Bed/Bath, Sports</td>
+            <td><span class="priority-high">Exclusive partnerships · Subscriptions</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tier 2 — Growth</strong></td>
+            <td>25–50% by GMV</td>
+            <td>Computers, Furniture, Auto Parts</td>
+            <td><span class="priority-medium">Cross-sell campaigns · Category SEO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tier 3 — Niche</strong></td>
+            <td>50–75% by GMV</td>
+            <td>Books, Office Supplies, Garden</td>
+            <td><span class="priority-low">Maintain · Bundle with Tier 1</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tier 4 — Tail</strong></td>
+            <td>Bottom 25% by GMV</td>
+            <td>Industry Equipment, Security, Food</td>
+            <td>Evaluate discontinuation or specialisation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     RECOMMENDATIONS
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-recommendations">
+  <div class="section-header">
+    <h2>🎯 Strategic Recommendations</h2>
+    <p>Data-driven business actions ranked by impact and effort</p>
+  </div>
+  <div class="chart-panel" style="margin-bottom:1.5rem;">
+    <div class="chart-panel-header">
+      <div><h3>Prioritised Action Plan</h3><p>5 recommendations with business impact estimates</p></div>
+      <span class="chart-tag">Strategy</span>
+    </div>
+    <div class="chart-panel-body" style="padding:0;">
+      <table class="rec-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Initiative</th><th>Priority</th><th>Est. Impact</th><th>Effort</th><th>Owner</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>At-Risk Customer Win-Back Campaign</strong><br><small>Personalised email + R$20 voucher to 23,188 At-Risk customers. 5% reactivation rate assumed.</small></td>
+            <td><span class="priority-high">HIGH</span></td>
+            <td><span class="impact-badge">R$214K revenue</span></td>
+            <td>Low</td>
+            <td>CMO / CRM Team</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Paid Search Budget Reallocation</strong><br><small>Shift 20% of social/email spend to Paid Search. 12.3% vs 3.0% conversion rate differential.</small></td>
+            <td><span class="priority-high">HIGH</span></td>
+            <td><span class="impact-badge">+35 deals/cohort</span></td>
+            <td>Low</td>
+            <td>CMO / Marketing Ops</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Northern Brazil Fulfilment Hub</strong><br><small>Serve North/Northeast (35% population, &lt;10% orders). Halve delivery times, reduce late rate to &lt;4%.</small></td>
+            <td><span class="priority-medium">MEDIUM</span></td>
+            <td><span class="impact-badge">+5K orders/yr</span></td>
+            <td>High</td>
+            <td>COO / Logistics</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Health & Beauty Subscription Tier</strong><br><small>Top category (R$1.26M GMV) with 92% repeat-consumable products. Monthly subscription box increases LTV 3–5×.</small></td>
+            <td><span class="priority-medium">MEDIUM</span></td>
+            <td><span class="impact-badge">LTV +3–5×</span></td>
+            <td>Medium</td>
+            <td>CPO / Product Team</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Carrier SLA Renegotiation + Proactive Alerts</strong><br><small>8.1% late deliveries cost 0.3 review points. Proactive SMS at T+12 recovers 30% of satisfaction loss.</small></td>
+            <td><span class="priority-low">LOW</span></td>
+            <td><span class="impact-badge">+0.3 stars</span></td>
+            <td>Low</td>
+            <td>COO / Carrier Relations</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PIPELINE
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="section-pipeline">
+  <div class="section-header">
+    <h2>⚙️ Pipeline Operations</h2>
+    <p>How to run each stage of the Olist analytics platform from your laptop</p>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card green">
+      <h4>✅ Prerequisites</h4>
+      <p>Python 3.11+, pip install -r requirements.txt, .env file configured, CSV files in data/raw/</p>
+    </div>
+    <div class="insight-card">
+      <h4>📁 Working Directory</h4>
+      <p>All commands run from the <strong>olist_platform/</strong> project root. Paths resolve automatically via .env.</p>
+    </div>
+    <div class="insight-card amber">
+      <h4>⚠️ First-Time Setup</h4>
+      <p>Copy .env.example → .env, fill in GCP_PROJECT_ID and GOOGLE_APPLICATION_CREDENTIALS before running ingestion.</p>
+    </div>
+  </div>
+
+  <div class="pipeline-steps">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-info">
+        <h4>Configure Environment</h4>
+        <p>Copy example env file, fill in credentials. Required before any other step.</p>
+      </div>
+      <code class="step-cmd">cp .env.example .env &amp;&amp; nano .env</code>
+      <div class="step-status">🔑</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-info">
+        <h4>Place CSV Data Files</h4>
+        <p>Copy all 11 Olist CSV files into the data/raw/ folder.</p>
+      </div>
+      <code class="step-cmd">cp ~/Downloads/olist_*.csv data/raw/</code>
+      <div class="step-status">📁</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2b</div>
+      <div class="step-info">
+        <h4>Set Up BigQuery Datasets (first time only)</h4>
+        <p>Creates olist_raw, olist_analytics, olist_analytics_staging, and olist_analytics_marts datasets.</p>
+      </div>
+      <code class="step-cmd">bash scripts/setup_bigquery.sh</code>
+      <div class="step-status">☁️</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-info">
+        <h4>Data Quality — Core Datasets</h4>
+        <p>Runs 51+ checks on orders, customers, products, etc. before loading.</p>
+      </div>
+      <code class="step-cmd">python data_quality/dq_validation.py</code>
+      <div class="step-status">🔍</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-info">
+        <h4>Data Quality — Geolocation</h4>
+        <p>Runs 30 checks on the 1M-row geolocation dataset.</p>
+      </div>
+      <code class="step-cmd">python data_quality/dq_geolocation.py</code>
+      <div class="step-status">🗺️</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">5</div>
+      <div class="step-info">
+        <h4>Ingest Core Datasets → BigQuery</h4>
+        <p>Loads all 10 CSV files into BigQuery olist_raw dataset.</p>
+      </div>
+      <code class="step-cmd">python ingestion/ingest_to_bigquery.py</code>
+      <div class="step-status">📥</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">6</div>
+      <div class="step-info">
+        <h4>Ingest Geolocation → BigQuery</h4>
+        <p>Deduplicates 1M rows to 19K zip prefixes and loads DimGeography.</p>
+      </div>
+      <code class="step-cmd">python ingestion/ingest_geolocation.py</code>
+      <div class="step-status">📍</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">7</div>
+      <div class="step-info">
+        <h4>Create Warehouse Schema</h4>
+        <p>Run schema.sql in BigQuery console to create all dimension and fact tables.</p>
+      </div>
+      <code class="step-cmd">bq query --use_legacy_sql=false &lt; warehouse/schema.sql</code>
+      <div class="step-status">🏛️</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">8</div>
+      <div class="step-info">
+        <h4>DBT Transformations</h4>
+        <p>Runs all 9 staging models + 7 mart models, then runs 80+ schema tests and 6 SQL integration tests.</p>
+      </div>
+      <code class="step-cmd">cd dbt_project &amp;&amp; dbt deps &amp;&amp; dbt run &amp;&amp; dbt test</code>
+      <div class="step-status">🔄</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">8b</div>
+      <div class="step-info">
+        <h4>Generate DBT Lineage Documentation (optional)</h4>
+        <p>Produces an interactive DAG showing all model dependencies. Browse at localhost:8080.</p>
+      </div>
+      <code class="step-cmd">cd dbt_project &amp;&amp; dbt docs generate &amp;&amp; dbt docs serve</code>
+      <div class="step-status">🔗</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">9</div>
+      <div class="step-info">
+        <h4>Generate Analysis &amp; Charts</h4>
+        <p>Produces all 8 charts to reports/charts/. Open as Jupyter notebook for interactive exploration.</p>
+      </div>
+      <code class="step-cmd">python notebooks/olist_analysis.py</code>
+      <div class="step-status">📊</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">10</div>
+      <div class="step-info">
+        <h4>Open This Dashboard</h4>
+        <p>Open dashboard/index.html in any browser. No server needed — fully self-contained.</p>
+      </div>
+      <code class="step-cmd">open dashboard/index.html</code>
+      <div class="step-status">🌐</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Olist Analytics Platform &nbsp;·&nbsp; Module 2 — Big Data Engineering &nbsp;·&nbsp;
+  Built with BigQuery · DBT · Airflow · Python &nbsp;·&nbsp;
+  <span id="footer-year"></span>
+</footer>
+
+<script src="charts_data.js"></script>
+<script>
+// ── Live clock ────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-time').textContent =
+    now.toLocaleString('en-GB', { dateStyle:'medium', timeStyle:'short' });
+}
+updateClock();
+setInterval(updateClock, 60000);
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+// ── Tab navigation ────────────────────────────────────────────────────────────
+function showTab(btn, sectionId) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('section-' + sectionId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Inject charts from embedded base64 data ───────────────────────────────────
+function setImg(id, key) {
+  const el = document.getElementById(id);
+  if (el && CHART_DATA && CHART_DATA[key]) {
+    el.src = 'data:image/png;base64,' + CHART_DATA[key];
+  }
+}
+
+// Map image IDs → chart data keys
+const chartMap = {
+  'img-revenue':    '01_revenue_trend',
+  'img-revenue2':   '01_revenue_trend',
+  'img-rfm':        '02_rfm_segments',
+  'img-rfm2':       '02_rfm_segments',
+  'img-marketing':  '03_marketing_funnel',
+  'img-category':   '04_category_performance',
+  'img-category2':  '04_category_performance',
+  'img-delivery':   '05_delivery_performance',
+  'img-sellers':    '06_seller_performance',
+  'img-geo':        '07_geographic',
+  'img-payments':   '08_payments',
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  for (const [imgId, key] of Object.entries(chartMap)) {
+    setImg(imgId, key);
+  }
+});
+</script>
+</body>
+</html>

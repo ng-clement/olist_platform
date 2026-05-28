@@ -1,0 +1,265 @@
+version: 2
+
+models:
+
+  # ── mart_monthly_revenue ─────────────────────────────────────────────────────
+  - name: mart_monthly_revenue
+    description: >
+      Monthly revenue KPI mart aggregated by product category.
+      Grain: one row per (revenue_month, category).
+      Powers executive GMV dashboards and trend charts.
+    columns:
+      - name: revenue_month
+        description: "First day of the calendar month (DATE)"
+        tests: [not_null]
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]
+      - name: category
+        tests: [not_null]
+      - name: total_revenue
+        description: "Sum of item_price + freight_value for delivered/non-cancelled orders"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: order_count
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: avg_order_value
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0 OR avg_order_value IS NULL"
+
+  # ── mart_customer_lifetime_value ─────────────────────────────────────────────
+  - name: mart_customer_lifetime_value
+    description: >
+      Customer Lifetime Value mart with RFM segmentation.
+      Grain: one row per customer_unique_id (delivered orders only).
+      Powers customer segmentation dashboards and retention analytics.
+    columns:
+      - name: customer_unique_id
+        description: "Stable customer identifier across multiple orders"
+        tests: [unique, not_null]
+      - name: customer_state
+        tests: [not_null]
+      - name: first_order_date
+        tests: [not_null]
+      - name: last_order_date
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= first_order_date"
+      - name: order_count
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+      - name: total_spend
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: rfm_segment
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Champions','Loyal Customers','New Customers','Potential Loyalists',
+                         'At Risk','Cant Lose Them','Sleeping Giants','Hibernating']
+      - name: value_tier
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['High Value','Medium Value','Low Value']
+      - name: estimated_clv
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  # ── mart_geo_performance ─────────────────────────────────────────────────────
+  - name: mart_geo_performance
+    description: >
+      Geographic revenue performance mart by state and month.
+      Grain: one row per (state_code, order_month).
+      Powers regional heatmaps and market penetration analysis.
+    columns:
+      - name: state_code
+        tests: [not_null]
+      - name: order_month
+        tests: [not_null]
+      - name: total_orders
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: total_revenue
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: region
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Southeast','South','Midwest','Northeast','North']
+
+  # ── mart_seller_performance ──────────────────────────────────────────────────
+  - name: mart_seller_performance
+    description: >
+      Seller performance KPI mart with GMV, delivery SLA, and satisfaction scores.
+      Grain: one row per seller_id (all-time aggregate).
+      Powers marketplace operations dashboard and seller tiering.
+    columns:
+      - name: seller_id
+        description: "Unique seller identifier"
+        tests: [unique, not_null]
+      - name: seller_tier
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Platinum','Gold','Silver','Bronze']
+      - name: performance_score
+        description: "Composite 0-100 score: 40% review, 35% on-time delivery, 25% cancellation"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 100"
+      - name: gross_merchandise_value
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: on_time_delivery_pct
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 100 OR on_time_delivery_pct IS NULL"
+      - name: avg_review_score
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 1 AND 5 OR avg_review_score IS NULL"
+
+  # ── mart_marketing_funnel ────────────────────────────────────────────────────
+  - name: mart_marketing_funnel
+    description: >
+      Marketing funnel performance mart by channel and acquisition cohort month.
+      Grain: one row per (origin, cohort_month).
+      Powers CMO channel attribution dashboards and budget allocation decisions.
+    columns:
+      - name: origin
+        description: "Acquisition channel (paid_search, organic_search, social, etc.)"
+        tests: [not_null]
+      - name: cohort_month
+        description: "Month of first MQL contact"
+        tests: [not_null]
+      - name: total_leads
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: converted_leads
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: conversion_rate_pct
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 100"
+      - name: conversion_tier
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['High Converting','Mid Converting','Low Converting']
+
+  # ── mart_logistics_performance ───────────────────────────────────────────────
+  - name: mart_logistics_performance
+    description: >
+      Logistics and delivery performance mart by state and month.
+      Grain: one row per (customer_state, order_month).
+      Powers COO operational dashboards, delivery SLA tracking, and satisfaction correlation.
+    columns:
+      - name: customer_state
+        tests: [not_null]
+      - name: order_month
+        tests: [not_null]
+      - name: total_delivered_orders
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: on_time_pct
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 100"
+      - name: avg_delivery_days
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: sla_performance_band
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Excellent','Good','Needs Improvement','Critical']
+
+  # ── mart_product_performance ─────────────────────────────────────────────────
+  - name: mart_product_performance
+    description: >
+      Product and category performance mart (all-time aggregates).
+      Grain: one row per product_category (English name).
+      Powers category manager dashboards, merchandise planning, and GMV attribution.
+    columns:
+      - name: category_english
+        description: "English-translated product category name"
+        tests: [unique, not_null]
+      - name: performance_tier
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Tier 1 — Core','Tier 2 — Growth','Tier 3 — Niche','Tier 4 — Tail']
+      - name: category_gross_revenue
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: revenue_share_pct
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 100"
+      - name: avg_review_score
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 1 AND 5 OR avg_review_score IS NULL"
