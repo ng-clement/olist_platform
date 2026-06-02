@@ -105,12 +105,20 @@ jobs:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
         run: python scripts/run_schema.py
 
-      # Meltano ELT: tap-csv reads the downloaded CSVs, target-bigquery
-      # loads them into olist_raw. Matches the Meltano asset in Dagster.
-      - name: Run Meltano ELT (tap-csv → target-bigquery → olist_raw)
+      # target-bigquery Meltano plugin is incompatible with google-cloud-bigquery
+      # 3.x (SchemaField API mismatch). The canonical ingestion path uses the
+      # project's own Python ingestion scripts instead.
+      - name: Ingest core datasets to BigQuery (olist_raw)
         env:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-        run: meltano run tap-csv target-bigquery
+          DATA_DIR: data/raw/
+        run: python ingestion/ingest_to_bigquery.py
+
+      - name: Ingest geolocation dataset to BigQuery (olist_raw)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          DATA_DIR: data/raw/
+        run: python ingestion/ingest_geolocation.py
 
   # ── Job 2: dbt Staging Models ──────────────────────────────────────────────
   # Rebuilds all 9 staging views and runs the 35+ staging schema tests.
@@ -282,7 +290,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Stage | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Ingest (DQ + Meltano ELT) | \`${{ needs.ingest.result }}\` |" \
+          echo "| Ingest (DQ + Python scripts) | \`${{ needs.ingest.result }}\` |" \
             >> "$GITHUB_STEP_SUMMARY"
           echo "| dbt Staging (9 views + 35+ tests) | \`${{ needs.dbt-staging.result }}\` |" \
             >> "$GITHUB_STEP_SUMMARY"
