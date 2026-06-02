@@ -40,14 +40,14 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
   .header-brand { display: flex; align-items: center; gap: 12px; }
-  .header-brand .logo { font-size: 1.90rem; }
-  .header-brand h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: 0.02em; }
-  .header-brand span { font-size: 1.20rem; opacity: 0.75; display: block; font-weight: 400; }
-  .header-meta { font-size: 1.20rem; opacity: 0.75; text-align: right; }
+  .header-brand .logo { font-size: 1.5rem; }
+  .header-brand h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.02em; }
+  .header-brand span { font-size: 0.8rem; opacity: 0.75; display: block; font-weight: 400; }
+  .header-meta { font-size: 0.8rem; opacity: 0.75; text-align: right; }
   .status-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 20px; padding: 4px 12px; font-size: 1.18rem;
+    border-radius: 20px; padding: 4px 12px; font-size: 0.78rem;
   }
   .status-dot { width: 8px; height: 8px; border-radius: 50%;
                 background: #4ADE80; animation: pulse 2s infinite; }
@@ -62,7 +62,7 @@
   }
   .nav-tab {
     padding: 0 1.25rem; height: 48px; display: flex; align-items: center; gap: 8px;
-    font-size: 1.28rem; font-weight: 500; color: var(--muted); cursor: pointer;
+    font-size: 0.88rem; font-weight: 500; color: var(--muted); cursor: pointer;
     border-bottom: 3px solid transparent; white-space: nowrap;
     transition: color 0.2s, border-color 0.2s;
     background: none; border-top: none; border-left: none; border-right: none;
@@ -78,7 +78,7 @@
   /* ── KPI Strip ────────────────────────────────────────────────────────── */
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem; margin-bottom: 1.5rem;
   }
   .kpi-card {
@@ -90,19 +90,19 @@
   .kpi-card.green { border-top-color: #16A34A; }
   .kpi-card.amber { border-top-color: #D97706; }
   .kpi-card.red   { border-top-color: #DC2626; }
-  .kpi-label  { font-size: 1.15rem; color: var(--muted); text-transform: uppercase;
+  .kpi-label  { font-size: 0.75rem; color: var(--muted); text-transform: uppercase;
                 letter-spacing: 0.06em; margin-bottom: 0.5rem; }
-  .kpi-value  { font-size: 2.15rem; font-weight: 700; color: var(--navy); line-height: 1; }
-  .kpi-sub    { font-size: 1.18rem; color: var(--muted); margin-top: 0.35rem; }
+  .kpi-value  { font-size: 1.75rem; font-weight: 700; color: var(--navy); line-height: 1; }
+  .kpi-sub    { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
   .kpi-delta  { display: inline-flex; align-items: center; gap: 3px;
-                font-size: 1.15rem; font-weight: 600; margin-top: 0.25rem; }
+                font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem; }
   .kpi-delta.up   { color: #16A34A; }
   .kpi-delta.down { color: #DC2626; }
 
   /* ── Section header ───────────────────────────────────────────────────── */
   .section-header { margin-bottom: 1.25rem; }
-  .section-header h2 { font-size: 1.75rem; color: var(--navy); font-weight: 700; }
-  .section-header p  { font-size: 1.28rem; color: var(--muted); margin-top: 0.25rem; }
+  .section-header h2 { font-size: 1.35rem; color: var(--navy); font-weight: 700; }
+  .section-header p  { font-size: 0.88rem; color: var(--muted); margin-top: 0.25rem; }
 
   /* ── Chart panels ─────────────────────────────────────────────────────── */
   .chart-grid {
@@ -120,12 +120,12 @@
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between;
   }
-  .chart-panel-header h3 { font-size: 1.35rem; font-weight: 600; color: var(--navy); }
-  .chart-panel-header p  { font-size: 1.18rem; color: var(--muted); margin-top: 2px; }
+  .chart-panel-header h3 { font-size: 0.95rem; font-weight: 600; color: var(--navy); }
+  .chart-panel-header p  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
   .chart-panel-body { padding: 1rem; }
   .chart-panel-body img { width: 100%; height: auto; border-radius: 6px; display: block; }
   .chart-tag {
-    font-size: 1.10rem; font-weight: 600; letter-spacing: 0.05em;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
     padding: 3px 8px; border-radius: 4px; background: var(--ltblue);
     color: var(--steel); text-transform: uppercase;
   }
@@ -141,17 +141,17 @@
   .insight-card.green { border-left-color: #16A34A; background: var(--ltgreen); }
   .insight-card.amber { border-left-color: #D97706; background: var(--ltamber); }
   .insight-card.red   { border-left-color: #DC2626; background: var(--ltred); }
-  .insight-card h4 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem;
+  .insight-card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem;
                      color: var(--navy); }
-  .insight-card p  { font-size: 1.22rem; color: var(--text); line-height: 1.5; }
+  .insight-card p  { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
 
   /* ── Recommendations table ────────────────────────────────────────────── */
   .rec-table { width: 100%; border-collapse: collapse; }
   .rec-table th {
     background: var(--navy); color: white; padding: 0.75rem 1rem;
-    text-align: left; font-size: 1.22rem; font-weight: 600; letter-spacing: 0.03em;
+    text-align: left; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.03em;
   }
-  .rec-table td { padding: 0.75rem 1rem; font-size: 1.25rem; border-bottom: 1px solid var(--border); }
+  .rec-table td { padding: 0.75rem 1rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
   .rec-table tr:nth-child(even) td { background: #F8FAFC; }
   .rec-table tr:hover td { background: var(--ltblue); }
   .priority-high   { color: #DC2626; font-weight: 700; }
@@ -159,7 +159,7 @@
   .priority-low    { color: #16A34A; font-weight: 700; }
   .impact-badge {
     background: var(--ltgreen); color: var(--green);
-    font-size: 1.15rem; font-weight: 700;
+    font-size: 0.75rem; font-weight: 700;
     padding: 2px 8px; border-radius: 12px; white-space: nowrap;
   }
 
@@ -174,30 +174,29 @@
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--steel); color: white;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 1.30rem; flex-shrink: 0;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
   }
   .step-info { flex: 1; }
-  .step-info h4 { font-size: 1.30rem; font-weight: 600; color: var(--navy); }
-  .step-info p  { font-size: 1.20rem; color: var(--muted); margin-top: 2px; }
+  .step-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+  .step-info p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
   .step-cmd {
-    font-family: 'Courier New', monospace; font-size: 1.18rem;
-    background: var(--ltblue); color: var(--steel);
+    font-family: 'Courier New', monospace; font-size: 0.78rem;
+    background: #1A1A2E; color: #4EAFD1;
     padding: 0.3rem 0.7rem; border-radius: 4px; white-space: nowrap;
   }
-  .step-status { font-size: 1.60rem; }
+  .step-status { font-size: 1.2rem; }
 
   /* ── Responsive ───────────────────────────────────────────────────────── */
   @media (max-width: 768px) {
     .main { padding: 1rem; }
     .chart-grid { grid-template-columns: 1fr; }
-    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
-    .kpi-value { font-size: 1.80rem; }
-    .header h1 { font-size: 1.40rem; }
+    .kpi-value { font-size: 1.4rem; }
+    .header h1 { font-size: 1rem; }
   }
 
   /* ── Footer ───────────────────────────────────────────────────────────── */
   footer {
-    text-align: center; padding: 2rem; font-size: 1.18rem; color: var(--muted);
+    text-align: center; padding: 2rem; font-size: 0.78rem; color: var(--muted);
     border-top: 1px solid var(--border); background: var(--panel);
   }
 </style>
@@ -232,7 +231,6 @@
   <button class="nav-tab"        data-section="geography"     onclick="showTab(this,'geography')">     🗺️ Geography</button>
   <button class="nav-tab"        data-section="payments"      onclick="showTab(this,'payments')">      💳 Payments</button>
   <button class="nav-tab"        data-section="sellers"       onclick="showTab(this,'sellers')">       🏪 Sellers</button>
-  <button class="nav-tab"        data-section="products"      onclick="showTab(this,'products')">      📦 Products</button>
   <button class="nav-tab"        data-section="recommendations" onclick="showTab(this,'recommendations')">🎯 Recommendations</button>
   <button class="nav-tab"        data-section="pipeline"      onclick="showTab(this,'pipeline')">      ⚙️ Pipeline</button>
 </nav>
@@ -571,106 +569,6 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════════════════
-     PRODUCTS
-════════════════════════════════════════════════════════════════════════════ -->
-<section class="section" id="section-products">
-  <div class="section-header">
-    <h2>📦 Product & Category Analytics</h2>
-    <p>Category GMV, performance tiers, and review quality across 73 product categories</p>
-  </div>
-
-  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
-    <div class="kpi-card green">
-      <div class="kpi-label">Top Category</div>
-      <div class="kpi-value" style="font-size:1.6rem;">Health &amp; Beauty</div>
-      <div class="kpi-sub">R$1.26M GMV</div>
-      <div class="kpi-delta up">↑ Largest single category</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Total Categories</div>
-      <div class="kpi-value">73</div>
-      <div class="kpi-sub">Active product categories</div>
-    </div>
-    <div class="kpi-card amber">
-      <div class="kpi-label">Top 4 Share</div>
-      <div class="kpi-value">30%</div>
-      <div class="kpi-sub">of total GMV</div>
-      <div class="kpi-delta down">↓ Category concentration risk</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Avg Category AOV</div>
-      <div class="kpi-value">R$137</div>
-      <div class="kpi-sub">Avg order value</div>
-    </div>
-  </div>
-
-  <div class="insight-row">
-    <div class="insight-card green">
-      <h4>🏆 Tier 1 — Core Categories (top 25% by GMV)</h4>
-      <p><strong>Health &amp; Beauty, Watches &amp; Gifts, Bed/Bath/Table, Sports &amp; Leisure</strong> together drive ~35% of total GMV from only 4 categories. Exclusive supplier partnerships and subscription models are the highest-ROI investment here.</p>
-    </div>
-    <div class="insight-card amber">
-      <h4>📉 Long-Tail (bottom 50% by GMV)</h4>
-      <p>The bottom 37 categories each contribute less than 0.5% of GMV. Consider consolidating catalogue, improving search discoverability, or offering category-specific promotions to activate latent demand.</p>
-    </div>
-    <div class="insight-card">
-      <h4>⭐ Review Quality by Category</h4>
-      <p>Electronics and Computers score lowest (avg 3.8–3.9). Health &amp; Beauty and Fashion score highest (4.2–4.4). Review score correlates strongly with delivery speed — faster categories score higher.</p>
-    </div>
-  </div>
-
-  <div class="chart-grid single">
-    <div class="chart-panel">
-      <div class="chart-panel-header">
-        <div><h3>Top 12 Product Categories by Revenue</h3><p>Total GMV and order count — ranked by gross revenue</p></div>
-        <span class="chart-tag">Products</span>
-      </div>
-      <div class="chart-panel-body"><img id="img-category2" src="" alt="Category Performance"></div>
-    </div>
-  </div>
-
-  <div class="chart-panel" style="margin-bottom:1.5rem;">
-    <div class="chart-panel-header">
-      <div><h3>Category Performance Tier Matrix</h3><p>Revenue quartile classification with review quality and on-time delivery signals</p></div>
-      <span class="chart-tag">Tiers</span>
-    </div>
-    <div class="chart-panel-body" style="padding:0;">
-      <table class="rec-table">
-        <thead>
-          <tr><th>Tier</th><th>Definition</th><th>Examples</th><th>Strategy</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Tier 1 — Core</strong></td>
-            <td>Top 25% by GMV</td>
-            <td>Health &amp; Beauty, Watches, Bed/Bath, Sports</td>
-            <td><span class="priority-high">Exclusive partnerships · Subscriptions</span></td>
-          </tr>
-          <tr>
-            <td><strong>Tier 2 — Growth</strong></td>
-            <td>25–50% by GMV</td>
-            <td>Computers, Furniture, Auto Parts</td>
-            <td><span class="priority-medium">Cross-sell campaigns · Category SEO</span></td>
-          </tr>
-          <tr>
-            <td><strong>Tier 3 — Niche</strong></td>
-            <td>50–75% by GMV</td>
-            <td>Books, Office Supplies, Garden</td>
-            <td><span class="priority-low">Maintain · Bundle with Tier 1</span></td>
-          </tr>
-          <tr>
-            <td><strong>Tier 4 — Tail</strong></td>
-            <td>Bottom 25% by GMV</td>
-            <td>Industry Equipment, Security, Food</td>
-            <td>Evaluate discontinuation or specialisation</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════════════════════════
      RECOMMENDATIONS
 ════════════════════════════════════════════════════════════════════════════ -->
 <section class="section" id="section-recommendations">
@@ -781,15 +679,6 @@
       <div class="step-status">📁</div>
     </div>
     <div class="pipeline-step">
-      <div class="step-num">2b</div>
-      <div class="step-info">
-        <h4>Set Up BigQuery Datasets (first time only)</h4>
-        <p>Creates olist_raw, olist_analytics, olist_analytics_staging, and olist_analytics_marts datasets.</p>
-      </div>
-      <code class="step-cmd">bash scripts/setup_bigquery.sh</code>
-      <div class="step-status">☁️</div>
-    </div>
-    <div class="pipeline-step">
       <div class="step-num">3</div>
       <div class="step-info">
         <h4>Data Quality — Core Datasets</h4>
@@ -838,19 +727,10 @@
       <div class="step-num">8</div>
       <div class="step-info">
         <h4>DBT Transformations</h4>
-        <p>Runs all 9 staging models + 7 mart models, then runs 80+ schema tests and 6 SQL integration tests.</p>
+        <p>Runs all staging models and mart models, then tests them.</p>
       </div>
-      <code class="step-cmd">cd dbt_project &amp;&amp; dbt deps &amp;&amp; dbt run &amp;&amp; dbt test</code>
+      <code class="step-cmd">cd dbt_project &amp;&amp; dbt run &amp;&amp; dbt test</code>
       <div class="step-status">🔄</div>
-    </div>
-    <div class="pipeline-step">
-      <div class="step-num">8b</div>
-      <div class="step-info">
-        <h4>Generate DBT Lineage Documentation (optional)</h4>
-        <p>Produces an interactive DAG showing all model dependencies. Browse at localhost:8080.</p>
-      </div>
-      <code class="step-cmd">cd dbt_project &amp;&amp; dbt docs generate &amp;&amp; dbt docs serve</code>
-      <div class="step-status">🔗</div>
     </div>
     <div class="pipeline-step">
       <div class="step-num">9</div>
@@ -912,17 +792,16 @@ function setImg(id, key) {
 
 // Map image IDs → chart data keys
 const chartMap = {
-  'img-revenue':    '01_revenue_trend',
-  'img-revenue2':   '01_revenue_trend',
-  'img-rfm':        '02_rfm_segments',
-  'img-rfm2':       '02_rfm_segments',
-  'img-marketing':  '03_marketing_funnel',
-  'img-category':   '04_category_performance',
-  'img-category2':  '04_category_performance',
-  'img-delivery':   '05_delivery_performance',
-  'img-sellers':    '06_seller_performance',
-  'img-geo':        '07_geographic',
-  'img-payments':   '08_payments',
+  'img-revenue':   '01_revenue_trend',
+  'img-revenue2':  '01_revenue_trend',
+  'img-rfm':       '02_rfm_segments',
+  'img-rfm2':      '02_rfm_segments',
+  'img-marketing': '03_marketing_funnel',
+  'img-category':  '04_category_performance',
+  'img-delivery':  '05_delivery_performance',
+  'img-sellers':   '06_seller_performance',
+  'img-geo':       '07_geographic',
+  'img-payments':  '08_payments',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
