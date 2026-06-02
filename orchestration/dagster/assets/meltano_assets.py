@@ -59,6 +59,7 @@ def _run(cmd: list[str], context: AssetExecutionContext, timeout: int = 1800) ->
 # orjson 3.6.1 requires Rust build). Using ingest_to_bigquery.py directly —
 # it uses the same google-cloud-bigquery library that works in this environment.
 
+
 @asset(
     group_name="ingestion",
     compute_kind="python",
@@ -93,6 +94,7 @@ def meltano_core_extract_load(context: AssetExecutionContext) -> Output[None]:
 
 
 # ── Asset 2: Geolocation ingestion ────────────────────────────────────────────
+
 
 @asset(
     group_name="ingestion",
@@ -129,7 +131,8 @@ def meltano_geo_extract_load(context: AssetExecutionContext) -> Output[None]:
             "mode": MetadataValue.text("incremental"),
             "skipped": MetadataValue.bool(skipped),
             "tables_written": MetadataValue.text(
-                "skipped (no change)" if skipped
+                "skipped (no change)"
+                if skipped
                 else "olist_raw.geolocation, olist_analytics.DimGeography"
             ),
             "log_tail": MetadataValue.text(stdout[-2000:] if stdout else "(no output)"),

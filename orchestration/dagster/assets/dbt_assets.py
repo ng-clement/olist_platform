@@ -39,7 +39,6 @@ This requires mapping the olist_raw source assets to Meltano/DQ asset keys
 via a custom DagsterDbtTranslator.
 """
 
-import os
 import re
 import subprocess
 from pathlib import Path
@@ -96,6 +95,7 @@ def _parse_dbt_summary(stdout: str) -> dict:
 
 # ── Asset 1: Star schema DDL ───────────────────────────────────────────────────
 
+
 @asset(
     group_name="warehouse",
     compute_kind="bigquery",
@@ -136,12 +136,15 @@ def star_schema_build(context: AssetExecutionContext) -> Output[None]:
         metadata={
             "drops_executed": MetadataValue.int(drops),
             "creates_executed": MetadataValue.int(creates),
-            "sql_file": MetadataValue.path(str(PROJECT_ROOT / "warehouse" / "schema.sql")),
+            "sql_file": MetadataValue.path(
+                str(PROJECT_ROOT / "warehouse" / "schema.sql")
+            ),
         },
     )
 
 
 # ── Asset 2: dbt staging ──────────────────────────────────────────────────────
+
 
 @asset(
     group_name="dbt",
@@ -173,6 +176,7 @@ def dbt_staging(context: AssetExecutionContext, dbt: DbtCliResource) -> Output[N
 
 
 # ── Asset 3: dbt marts ────────────────────────────────────────────────────────
+
 
 @asset(
     group_name="dbt",
@@ -208,6 +212,7 @@ def dbt_marts(context: AssetExecutionContext, dbt: DbtCliResource) -> Output[Non
 
 # ── Asset 4: dbt tests ────────────────────────────────────────────────────────
 
+
 @asset(
     group_name="dbt",
     compute_kind="dbt",
@@ -237,6 +242,8 @@ def dbt_tests(context: AssetExecutionContext, dbt: DbtCliResource) -> Output[Non
         metadata={
             "test_count": MetadataValue.int(181),
             "singular_tests": MetadataValue.int(6),
-            "test_path": MetadataValue.path(str(PROJECT_ROOT / "dbt_project" / "tests")),
+            "test_path": MetadataValue.path(
+                str(PROJECT_ROOT / "dbt_project" / "tests")
+            ),
         },
     )

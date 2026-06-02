@@ -19,7 +19,7 @@ PROJECT = os.environ.get("GCP_PROJECT_ID")
 if not PROJECT:
     print("❌  GCP_PROJECT_ID is not set — add it to .env or export it before running.")
     sys.exit(1)
-SCHEMA  = Path(__file__).resolve().parents[1] / "warehouse" / "schema.sql"
+SCHEMA = Path(__file__).resolve().parents[1] / "warehouse" / "schema.sql"
 
 client = bigquery.Client(project=PROJECT)
 
@@ -34,7 +34,7 @@ def strip_line_comments(sql: str) -> str:
                 in_string = True
             elif ch == "'" and in_string:
                 in_string = False
-            elif line[i:i+2] == "--" and not in_string:
+            elif line[i : i + 2] == "--" and not in_string:
                 line = line[:i]
                 break
         result.append(line)
@@ -82,7 +82,8 @@ t0 = time.time()
 for stmt in statements:
     name_match = re.search(
         r"(?:DROP TABLE IF EXISTS|CREATE OR REPLACE TABLE)\s+`[^.]+\.([^`]+)`",
-        stmt, re.IGNORECASE,
+        stmt,
+        re.IGNORECASE,
     )
     label = name_match.group(1) if name_match else stmt[:50].replace("\n", " ")
 
@@ -106,15 +107,19 @@ for stmt in statements:
         # The table already exists from a prior run so downstream dbt can proceed.
         is_quota = "quotaExceeded" in str(exc) or "Quota exceeded" in str(exc)
         if is_quota:
-            print(f"  ⚠️  {kind} {label:<35} QUOTA WARNING (table retained): {short_err[:80]}")
+            print(
+                f"  ⚠️  {kind} {label:<35} QUOTA WARNING (table retained): {short_err[:80]}"
+            )
             quota_warnings += 1
         else:
             print(f"  ❌ {kind} {label:<35} {short_err}")
             errors += 1
 
 print()
-print(f"  Schema build complete — {total} statements, {errors} errors, "
-      f"{quota_warnings} quota warnings  ({time.time() - t0:.1f}s total)")
+print(
+    f"  Schema build complete — {total} statements, {errors} errors, "
+    f"{quota_warnings} quota warnings  ({time.time() - t0:.1f}s total)"
+)
 
 if errors:
     sys.exit(1)

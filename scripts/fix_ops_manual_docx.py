@@ -4,19 +4,18 @@ Patch OLP-OPS-001_Operations_Manual.docx:
 - Fix conda env name bde → olist
 - Add Dagster orchestration content to section 4
 """
+
 import re
 from docx import Document
 from docx.shared import Pt, RGBColor
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
 
 EMOJI_RE = re.compile(
     "["
-    "\U0001F000-\U0001FFFF"
-    "\U00002600-\U000027BF"
-    "\U0000FE0F"
-    "\U000020D0-\U000020FF"
-    "\U00002702-\U000027B0"
+    "\U0001f000-\U0001ffff"
+    "\U00002600-\U000027bf"
+    "\U0000fe0f"
+    "\U000020d0-\U000020ff"
+    "\U00002702-\U000027b0"
     "]+",
     flags=re.UNICODE,
 )
@@ -37,7 +36,7 @@ def clean_runs(para):
         if run.text:
             cleaned = strip_emoji(run.text)
             # Fix field labels: remove leftover whitespace before colon
-            cleaned = re.sub(r'\s{2,}:', ':', cleaned)
+            cleaned = re.sub(r"\s{2,}:", ":", cleaned)
             run.text = cleaned
 
 
@@ -137,7 +136,11 @@ def fix_doc():
         txt = para.text.strip()
 
         # Replace the project structure block
-        if not structure_replaced and "olist_platform/" in txt and ("PROJECT_ROOT" in txt or "project root" in txt.lower()):
+        if (
+            not structure_replaced
+            and "olist_platform/" in txt
+            and ("PROJECT_ROOT" in txt or "project root" in txt.lower())
+        ):
             for run in para.runs:
                 run.text = ""
             if para.runs:
@@ -149,14 +152,22 @@ def fix_doc():
         # Update the conda install section
         if "conda env create" in txt and "bde" in txt.lower():
             for run in para.runs:
-                run.text = run.text.replace("bde-environment.yml", "olist-environment.yml")
-                run.text = run.text.replace("conda activate bde", "conda activate olist")
+                run.text = run.text.replace(
+                    "bde-environment.yml", "olist-environment.yml"
+                )
+                run.text = run.text.replace(
+                    "conda activate bde", "conda activate olist"
+                )
 
         # Update Section 4 to add Dagster context
         if txt.startswith("4.") and "Running" in txt and "Application" in txt:
             orchestration_found = True
 
-        if orchestration_found and not structure_replaced and "Every command below is run from" in txt:
+        if (
+            orchestration_found
+            and not structure_replaced
+            and "Every command below is run from" in txt
+        ):
             # Append Dagster information to this paragraph
             for run in para.runs:
                 pass

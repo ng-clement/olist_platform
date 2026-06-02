@@ -67,6 +67,12 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      # setup-gcloud activates the service account for gsutil.
+      # auth@v2 alone sets GOOGLE_APPLICATION_CREDENTIALS but gsutil
+      # requires the Cloud SDK to be explicitly configured with those creds.
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       # Attempt to download the previous manifest from GCS.
       # The manifest was uploaded by the last successful compile (step below).
       # On the very first run this file won't exist — that's handled gracefully.
@@ -83,6 +89,12 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
             echo "No previous manifest — will fall back to full staging build."
           fi
+
+      - name: Install dbt package dependencies
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt deps --profiles-dir profiles
 
       # dbt compile connects to BigQuery to resolve source schemas and validate
       # SQL. This is the strictest validation possible without executing models:
@@ -129,12 +141,21 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Download previous manifest
         run: |
           mkdir -p /tmp/dbt-state
           gsutil cp \
             "gs://${{ vars.GCS_BUCKET_NAME }}/dbt-state/manifest.json" \
             /tmp/dbt-state/manifest.json
+
+      - name: Install dbt package dependencies
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt deps --profiles-dir profiles
 
       # state:modified+  = the changed model + ALL downstream dependents.
       # Example: if mart_seller_performance.sql changed, this builds:
@@ -177,6 +198,15 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install dbt package dependencies
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt deps --profiles-dir profiles
 
       - name: Build & test all staging models
         working-directory: dbt_project

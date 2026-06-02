@@ -10,7 +10,6 @@ This makes individual assets unit-testable by swapping in mock resources.
 
 from pathlib import Path
 
-from dagster import EnvVar
 from dagster_dbt import DbtCliResource
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

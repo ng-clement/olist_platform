@@ -1,4 +1,5 @@
 """Rebuild presentation_transcript.docx from presentation_transcript.md."""
+
 from pathlib import Path
 from docx import Document
 from docx.shared import Pt, RGBColor, Inches
@@ -109,7 +110,7 @@ def build():
             continue
 
         # Quoted speech paragraph
-        if line.startswith('"') or (line and lines[i - 1:i] and '"' in line):
+        if line.startswith('"') or (line and lines[i - 1 : i] and '"' in line):
             p = doc.add_paragraph(line)
             for run in p.runs:
                 run.font.size = Pt(10)
@@ -125,7 +126,7 @@ def build():
                 if not part:
                     continue
                 run = p.add_run(part)
-                run.bold = (j % 2 == 1)
+                run.bold = j % 2 == 1
                 run.font.size = Pt(10)
             i += 1
             continue

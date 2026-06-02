@@ -30,10 +30,10 @@ if not PROJECT:
 REGION = os.environ.get("GCP_REGION", "US")
 
 REQUIRED_DATASETS = [
-    ("olist_raw",                "Raw ingestion layer — all source CSVs loaded here"),
-    ("olist_analytics",          "Star schema — dimension and fact tables"),
-    ("olist_analytics_staging",  "DBT staging views"),
-    ("olist_analytics_marts",    "DBT mart tables (pre-aggregated KPIs)"),
+    ("olist_raw", "Raw ingestion layer — all source CSVs loaded here"),
+    ("olist_analytics", "Star schema — dimension and fact tables"),
+    ("olist_analytics_staging", "DBT staging views"),
+    ("olist_analytics_marts", "DBT mart tables (pre-aggregated KPIs)"),
 ]
 
 
@@ -88,8 +88,12 @@ def main():
         print("  ⚠️  WARNING — olist_raw already contains tables.")
         print()
         print("  Choose an option:")
-        print("    [y] Overwrite in-place  — keep datasets, WRITE_TRUNCATE replaces table data")
-        print("    [d] Drop and reset      — delete all 4 datasets, recreate empty, then proceed")
+        print(
+            "    [y] Overwrite in-place  — keep datasets, WRITE_TRUNCATE replaces table data"
+        )
+        print(
+            "    [d] Drop and reset      — delete all 4 datasets, recreate empty, then proceed"
+        )
         print("    [n] Abort               — stop now, do nothing")
         print()
         answer = input("  Your choice  [y/d/N]: ").strip().lower()
@@ -98,8 +102,9 @@ def main():
             print()
             print("  Dropping all datasets...")
             for ds_id, _ in REQUIRED_DATASETS:
-                client.delete_dataset(f"{PROJECT}.{ds_id}",
-                                      delete_contents=True, not_found_ok=True)
+                client.delete_dataset(
+                    f"{PROJECT}.{ds_id}", delete_contents=True, not_found_ok=True
+                )
                 print(f"  🗑️  Dropped: {ds_id}")
             print()
             print("  Recreating datasets...")

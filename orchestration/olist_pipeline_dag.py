@@ -36,9 +36,9 @@ DEFAULT_ARGS = {
 }
 
 # ── Resolved at runtime from Airflow Variables ────────────────────────────────
-ROOT   = "{{ var.value.project_root }}"      # e.g. /home/user/olist_platform
+ROOT = "{{ var.value.project_root }}"  # e.g. /home/user/olist_platform
 PYTHON = f"cd {ROOT} && python"
-DBT    = f"cd {ROOT}/dbt_project && dbt"
+DBT = f"cd {ROOT}/dbt_project && dbt"
 
 with DAG(
     dag_id="olist_daily_pipeline",
@@ -50,10 +50,9 @@ with DAG(
     max_active_runs=1,
     tags=["olist", "production", "daily"],
 ) as dag:
-
     # ── 0. Bookends ───────────────────────────────────────────────────────────
     start = EmptyOperator(task_id="pipeline_start")
-    end   = EmptyOperator(
+    end = EmptyOperator(
         task_id="pipeline_end",
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
@@ -187,7 +186,7 @@ with DAG(
         task_id="notify_success",
         bash_command=(
             "curl -s -X POST {{{{ var.value.slack_webhook }}}} "
-            "-d '{\"text\": \"✅ olist_daily_pipeline completed — {{{{ ds }}}}\"}'"
+            '-d \'{"text": "✅ olist_daily_pipeline completed — {{{{ ds }}}}"}\''
         ),
         trigger_rule=TriggerRule.ALL_SUCCESS,
     )
@@ -195,7 +194,7 @@ with DAG(
         task_id="notify_failure",
         bash_command=(
             "curl -s -X POST {{{{ var.value.slack_webhook }}}} "
-            "-d '{\"text\": \"❌ olist_daily_pipeline FAILED — {{{{ ds }}}} — check logs\"}'"
+            '-d \'{"text": "❌ olist_daily_pipeline FAILED — {{{{ ds }}}} — check logs"}\''
         ),
         trigger_rule=TriggerRule.ONE_FAILED,
     )
@@ -203,17 +202,27 @@ with DAG(
     # ── Dependency graph ──────────────────────────────────────────────────────
     start >> [ingest_core, ingest_geo]
     ingest_core >> dq_core
-    ingest_geo  >> dq_geo
+    ingest_geo >> dq_geo
     [dq_core, dq_geo] >> dq_gate
     dq_gate >> [build_schema, dbt_stg_core, dbt_stg_geo]
     [build_schema, dbt_stg_core, dbt_stg_geo] >> staging_gate
     staging_gate >> [
-        dbt_mart_revenue, dbt_mart_clv, dbt_mart_geo,
-        dbt_mart_seller, dbt_mart_marketing, dbt_mart_logistics, dbt_mart_product,
+        dbt_mart_revenue,
+        dbt_mart_clv,
+        dbt_mart_geo,
+        dbt_mart_seller,
+        dbt_mart_marketing,
+        dbt_mart_logistics,
+        dbt_mart_product,
     ]
     [
-        dbt_mart_revenue, dbt_mart_clv, dbt_mart_geo,
-        dbt_mart_seller, dbt_mart_marketing, dbt_mart_logistics, dbt_mart_product,
+        dbt_mart_revenue,
+        dbt_mart_clv,
+        dbt_mart_geo,
+        dbt_mart_seller,
+        dbt_mart_marketing,
+        dbt_mart_logistics,
+        dbt_mart_product,
     ] >> marts_gate
     marts_gate >> dbt_test
     dbt_test >> [run_analysis, archive_gcs]

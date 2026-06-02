@@ -77,7 +77,9 @@ def olist_analytics_charts(context: AssetExecutionContext) -> Output[None]:
         )
 
     # Verify expected output files were created
-    charts_found = [f.name for f in CHARTS_DIR.glob("*.png")] if CHARTS_DIR.exists() else []
+    charts_found = (
+        [f.name for f in CHARTS_DIR.glob("*.png")] if CHARTS_DIR.exists() else []
+    )
     missing = [c for c in EXPECTED_CHARTS if c not in charts_found]
 
     return Output(
@@ -88,6 +90,8 @@ def olist_analytics_charts(context: AssetExecutionContext) -> Output[None]:
             "missing_charts": MetadataValue.text(
                 ", ".join(missing) if missing else "none — all 8 charts present"
             ),
-            "stdout_tail": MetadataValue.text(result.stdout[-1000:] if result.stdout else ""),
+            "stdout_tail": MetadataValue.text(
+                result.stdout[-1000:] if result.stdout else ""
+            ),
         },
     )

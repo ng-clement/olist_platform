@@ -32,14 +32,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 
 _REQUIRED_DATASETS = [
-    ("olist_raw",               "Raw ingestion layer — all source CSVs loaded here"),
-    ("olist_analytics",         "Star schema — dimension and fact tables"),
+    ("olist_raw", "Raw ingestion layer — all source CSVs loaded here"),
+    ("olist_analytics", "Star schema — dimension and fact tables"),
     ("olist_analytics_staging", "dbt staging views"),
-    ("olist_analytics_marts",   "dbt mart tables (pre-aggregated KPIs)"),
+    ("olist_analytics_marts", "dbt mart tables (pre-aggregated KPIs)"),
 ]
 
 
 # ── Asset 0: BigQuery dataset readiness ───────────────────────────────────────
+
 
 @asset(
     group_name="data_quality",
@@ -88,7 +89,9 @@ def bq_datasets_ready(context: AssetExecutionContext) -> Output[None]:
     )
 
 
-def _run_dq(script: str, context: AssetExecutionContext, timeout: int = 900) -> tuple[int, str]:
+def _run_dq(
+    script: str, context: AssetExecutionContext, timeout: int = 900
+) -> tuple[int, str]:
     """Run a DQ script and return (returncode, stdout)."""
     result = subprocess.run(
         ["python", script],
@@ -120,6 +123,7 @@ def _parse_core_summary(stdout: str) -> dict:
 
 # ── Asset 1: Core dataset validation ──────────────────────────────────────────
 
+
 @asset(
     group_name="data_quality",
     compute_kind="python",
@@ -146,7 +150,9 @@ def dq_core_validation(context: AssetExecutionContext) -> Output[None]:
     """
     returncode, stdout = _run_dq("data_quality/dq_validation.py", context, timeout=900)
     metadata = _parse_core_summary(stdout)
-    metadata["log_tail"] = MetadataValue.text(stdout[-2000:] if stdout else "(no output)")
+    metadata["log_tail"] = MetadataValue.text(
+        stdout[-2000:] if stdout else "(no output)"
+    )
     if returncode != 0:
         failed = metadata.get("checks_failed", MetadataValue.int(0))
         raise Failure(
@@ -161,6 +167,7 @@ def dq_core_validation(context: AssetExecutionContext) -> Output[None]:
 
 
 # ── Asset 2: Geolocation validation ───────────────────────────────────────────
+
 
 @asset(
     group_name="data_quality",
@@ -190,7 +197,9 @@ def dq_geo_validation(context: AssetExecutionContext) -> Output[None]:
     returncode, stdout = _run_dq("data_quality/dq_geolocation.py", context, timeout=600)
 
     # Parse pass rate from JSON summary line if present
-    metadata: dict = {"log_tail": MetadataValue.text(stdout[-2000:] if stdout else "(no output)")}
+    metadata: dict = {
+        "log_tail": MetadataValue.text(stdout[-2000:] if stdout else "(no output)")
+    }
     m = re.search(r'"pass_rate":\s*([\d.]+)', stdout)
     if m:
         metadata["pass_rate_pct"] = MetadataValue.float(float(m.group(1)))

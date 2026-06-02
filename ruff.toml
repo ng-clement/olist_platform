@@ -1,0 +1,8 @@
+# Ruff configuration for the Olist Analytics Platform
+# https://docs.astral.sh/ruff/configuration/
+
+[lint.per-file-ignores]
+# notebooks/olist_analysis.py uses `warnings.filterwarnings("ignore")` before
+# imports to suppress deprecation warnings at import time. This is intentional
+# Jupytext/notebook practice — imports after the filter call are expected.
+"notebooks/*.py" = ["E402"]
