@@ -82,6 +82,16 @@ jobs:
           echo '{"type":"service_account","project_id":"ci-placeholder"}' \
             > /tmp/ci-creds.json
 
+      # dbt deps downloads packages listed in packages.yml (dbt_utils etc.)
+      # into dbt_project/dbt_packages/. Must run before parse — models that
+      # reference dbt_utils macros will fail to parse if packages aren't installed.
+      - name: Install dbt package dependencies
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ci-placeholder
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/ci-creds.json
+        run: dbt deps --profiles-dir profiles
+
       - name: Parse dbt project (SQL syntax, no BigQuery connection)
         working-directory: dbt_project
         env:
