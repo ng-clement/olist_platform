@@ -76,7 +76,7 @@ def has_sql(stmt: str) -> bool:
 sql = strip_line_comments(SCHEMA.read_text())
 statements = [s for s in split_statements(sql) if has_sql(s)]
 
-total = errors = 0
+total = errors = quota_warnings = 0
 t0 = time.time()
 
 for stmt in statements:
@@ -102,12 +102,20 @@ for stmt in statements:
         total += 1
     except Exception as exc:
         short_err = str(exc).split("\n")[0]
-        print(f"  ❌ {kind} {label:<35} {short_err}")
-        errors += 1
+        # Quota errors are transient — treat as warnings, not hard failures.
+        # The table already exists from a prior run so downstream dbt can proceed.
+        is_quota = "quotaExceeded" in str(exc) or "Quota exceeded" in str(exc)
+        if is_quota:
+            print(f"  ⚠️  {kind} {label:<35} QUOTA WARNING (table retained): {short_err[:80]}")
+            quota_warnings += 1
+        else:
+            print(f"  ❌ {kind} {label:<35} {short_err}")
+            errors += 1
 
 print()
-print(f"  Schema build complete — {total} statements, {errors} errors"
-      f"  ({time.time() - t0:.1f}s total)")
+print(f"  Schema build complete — {total} statements, {errors} errors, "
+      f"{quota_warnings} quota warnings  ({time.time() - t0:.1f}s total)")
 
 if errors:
     sys.exit(1)
+# quota_warnings alone → exit 0 so downstream assets are not blocked

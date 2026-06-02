@@ -1,0 +1,9 @@
+[32m2026-05-29 16:43:53 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 264718 - LOGS_CAPTURED - Started capturing logs in process (pid: 264718).
+[32m2026-05-29 16:43:53 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 264718 - dbt_marts - STEP_START - Started execution of step "dbt_marts".
+[32m2026-05-29 16:43:53 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dbt_marts - dbt run --select tag:mart
+[32m2026-05-29 16:44:05 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dbt_marts - Copying `/home/jinava/olist_platform/dbt_project/target/partial_parse.msgpack` to `/home/jinava/olist_platform/dbt_project/target/198f744/partial_parse.msgpack` to take advantage of partial parsing.
+[32m2026-05-29 16:44:05 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dbt_marts - Running dbt command: `dbt --no-use-colors run --select tag:mart --target prod`.
+[32m2026-05-29 16:44:29 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dbt_marts - Finished dbt command: `dbt --no-use-colors run --select tag:mart --target prod`.
+[32m2026-05-29 16:44:29 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 264718 - dbt_marts - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:44:29 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 264718 - dbt_marts - ASSET_MATERIALIZATION - Materialized value dbt_marts.
+[32m2026-05-29 16:44:29 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 264718 - dbt_marts - STEP_SUCCESS - Finished execution of step "dbt_marts" in 33.86s.

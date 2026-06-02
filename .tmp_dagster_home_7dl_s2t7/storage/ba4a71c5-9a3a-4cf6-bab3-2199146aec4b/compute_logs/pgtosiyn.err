@@ -1,0 +1,9 @@
+[32m2026-05-29 16:50:13 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 280854 - LOGS_CAPTURED - Started capturing logs in process (pid: 280854).
+[32m2026-05-29 16:50:13 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 280854 - dbt_staging - STEP_START - Started execution of step "dbt_staging".
+[32m2026-05-29 16:50:13 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_staging - dbt run --select tag:staging
+[32m2026-05-29 16:50:26 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_staging - Copying `/home/jinava/olist_platform/dbt_project/target/partial_parse.msgpack` to `/home/jinava/olist_platform/dbt_project/target/2be7c9f/partial_parse.msgpack` to take advantage of partial parsing.
+[32m2026-05-29 16:50:26 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_staging - Running dbt command: `dbt --no-use-colors run --select tag:staging --target prod`.
+[32m2026-05-29 16:50:43 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_staging - Finished dbt command: `dbt --no-use-colors run --select tag:staging --target prod`.
+[32m2026-05-29 16:50:43 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 280854 - dbt_staging - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:50:43 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 280854 - dbt_staging - ASSET_MATERIALIZATION - Materialized value dbt_staging.
+[32m2026-05-29 16:50:43 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 280854 - dbt_staging - STEP_SUCCESS - Finished execution of step "dbt_staging" in 27.82s.

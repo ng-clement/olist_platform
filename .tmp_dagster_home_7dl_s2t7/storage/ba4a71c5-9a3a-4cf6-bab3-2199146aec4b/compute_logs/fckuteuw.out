@@ -1,0 +1,28 @@
+Running with dbt=1.10.17
+Registered adapter: bigquery=1.11.0
+Unable to do partial parsing because config vars, config profile, or config target have changed
+Unable to do partial parsing because profile has changed
+Found 16 models, 115 data tests, 11 sources, 665 macros
+
+Concurrency: 8 threads (target='prod')
+
+1 of 7 START sql table model olist_analytics_marts.mart_customer_lifetime_value  [RUN]
+2 of 7 START sql incremental model olist_analytics_marts.mart_geo_performance .. [RUN]
+3 of 7 START sql incremental model olist_analytics_marts.mart_logistics_performance  [RUN]
+4 of 7 START sql table model olist_analytics_marts.mart_marketing_funnel ....... [RUN]
+5 of 7 START sql table model olist_analytics_marts.mart_monthly_revenue ........ [RUN]
+6 of 7 START sql table model olist_analytics_marts.mart_product_performance .... [RUN]
+7 of 7 START sql table model olist_analytics_marts.mart_seller_performance ..... [RUN]
+4 of 7 OK created sql table model olist_analytics_marts.mart_marketing_funnel .. [CREATE TABLE (113.0 rows, 515.0 KiB processed) in 4.43s]
+2 of 7 OK created sql incremental model olist_analytics_marts.mart_geo_performance  [MERGE (27.0 rows, 26.2 MiB processed) in 4.77s]
+5 of 7 OK created sql table model olist_analytics_marts.mart_monthly_revenue ... [CREATE TABLE (1.3k rows, 29.0 MiB processed) in 5.02s]
+3 of 7 OK created sql incremental model olist_analytics_marts.mart_logistics_performance  [MERGE (53.0 rows, 21.6 MiB processed) in 5.03s]
+7 of 7 OK created sql table model olist_analytics_marts.mart_seller_performance  [CREATE TABLE (3.1k rows, 31.0 MiB processed) in 5.18s]
+6 of 7 OK created sql table model olist_analytics_marts.mart_product_performance  [CREATE TABLE (74.0 rows, 35.3 MiB processed) in 6.67s]
+1 of 7 OK created sql table model olist_analytics_marts.mart_customer_lifetime_value  [CREATE TABLE (93.4k rows, 28.9 MiB processed) in 13.38s]
+
+Finished running 2 incremental models, 5 table models in 0 hours 0 minutes and 14.70 seconds (14.70s).
+
+Completed successfully
+
+Done. PASS=7 WARN=0 ERROR=0 SKIP=0 NO-OP=0 TOTAL=7

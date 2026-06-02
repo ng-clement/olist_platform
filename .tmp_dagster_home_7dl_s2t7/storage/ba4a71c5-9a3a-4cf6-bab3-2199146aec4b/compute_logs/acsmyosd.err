@@ -1,0 +1,40 @@
+[32m2026-05-29 16:53:00 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 288286 - LOGS_CAPTURED - Started capturing logs in process (pid: 288286).
+[32m2026-05-29 16:53:00 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 288286 - olist_analytics_charts - STEP_START - Started execution of step "olist_analytics_charts".
+[32m2026-05-29 16:53:15 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - olist_analytics_charts - Data directory : data/raw
+Reports output : /home/jinava/olist_platform/reports/charts
+Loading datasets...
+✅ All datasets loaded successfully.
+Chart saved: /home/jinava/olist_platform/reports/charts/01_revenue_trend.png
+Peak month: 2017-11
+Peak revenue: R$0.99M
+Chart saved: /home/jinava/olist_platform/reports/charts/02_rfm_segments.png
+Champions: 12,260
+At Risk:   36,218
+Chart saved: /home/jinava/olist_platform/reports/charts/03_marketing_funnel.png
+Overall conversion: 10.5%
+Chart saved: /home/jinava/olist_platform/reports/charts/04_category_performance.png
+Chart saved: /home/jinava/olist_platform/reports/charts/05_delivery_performance.png
+On-time delivery rate: 91.9%
+Avg delivery days:     12.1
+Chart saved: /home/jinava/olist_platform/reports/charts/06_seller_performance.png
+Chart saved: /home/jinava/olist_platform/reports/charts/07_geographic.png
+Chart saved: /home/jinava/olist_platform/reports/charts/08_payments.png
+
+============================================================
+OLIST BUSINESS INTELLIGENCE SUMMARY
+============================================================
+Total GMV          : R$13,591,643.70
+Total Orders       :       99,441
+Delivered Orders   :       96,478
+Avg Order Value    : R$      137.75
+Avg Review Score   :         4.09 / 5.0
+On-Time Delivery   :        91.9%
+Avg Delivery Days  :         12.1
+MQL Conversion     :        10.5%
+============================================================
+
+✅ All 8 charts saved to: /home/jinava/olist_platform/reports/charts
+
+[32m2026-05-29 16:53:15 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 288286 - olist_analytics_charts - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:53:16 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 288286 - olist_analytics_charts - ASSET_MATERIALIZATION - Materialized value olist_analytics_charts.
+[32m2026-05-29 16:53:16 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 288286 - olist_analytics_charts - STEP_SUCCESS - Finished execution of step "olist_analytics_charts" in 12.83s.

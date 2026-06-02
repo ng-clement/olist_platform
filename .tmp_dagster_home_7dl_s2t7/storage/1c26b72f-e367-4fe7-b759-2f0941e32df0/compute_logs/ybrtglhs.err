@@ -1,0 +1,9 @@
+[32m2026-05-29 16:41:25 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258167 - LOGS_CAPTURED - Started capturing logs in process (pid: 258167).
+[32m2026-05-29 16:41:25 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258167 - bq_datasets_ready - STEP_START - Started execution of step "bq_datasets_ready".
+[32m2026-05-29 16:41:26 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - bq_datasets_ready - Dataset exists: olist_raw
+[32m2026-05-29 16:41:26 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - bq_datasets_ready - Dataset exists: olist_analytics
+[32m2026-05-29 16:41:27 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - bq_datasets_ready - Dataset exists: olist_analytics_staging
+[32m2026-05-29 16:41:27 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - bq_datasets_ready - Dataset exists: olist_analytics_marts
+[32m2026-05-29 16:41:27 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258167 - bq_datasets_ready - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:41:27 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258167 - bq_datasets_ready - ASSET_MATERIALIZATION - Materialized value bq_datasets_ready.
+[32m2026-05-29 16:41:27 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258167 - bq_datasets_ready - STEP_SUCCESS - Finished execution of step "bq_datasets_ready" in 2.12s.

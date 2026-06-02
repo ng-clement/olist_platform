@@ -1,0 +1,323 @@
+name: Daily Pipeline — Full Olist ELT
+
+# Primary orchestrator for this pipeline is Dagster (olist_daily_at_0600_utc
+# schedule, 06:00 UTC). This workflow serves two purposes:
+#
+#   1. Fallback cron — fires at the same time (06:00 UTC) if the Dagster
+#      daemon is not running (e.g. local dev machine is off).
+#   2. Manual trigger — workflow_dispatch lets anyone run the pipeline on demand
+#      from the GitHub Actions UI, with an optional full re-ingestion mode.
+#
+# The 5 jobs are strictly sequential. Each job blocks the next on failure,
+# mirroring the CRITICAL-exit DQ layer in the local pipeline run.
+#
+# Pipeline modes (controlled by workflow_dispatch input):
+#   full_pipeline = false (default, used by cron)
+#     → Assumes raw data already in BigQuery.
+#       Runs: dbt staging → dbt marts → integration tests → notify
+#
+#   full_pipeline = true (manual only)
+#     → Downloads raw CSVs from GCS, runs Python DQ validation,
+#       applies star schema DDL, runs Meltano ELT, then continues
+#       with dbt staging → marts → integration tests → notify.
+#
+# Required GitHub Secrets:
+#   GCP_SERVICE_ACCOUNT_KEY   — full JSON of olist-analytics-gcp-key.json
+#   SLACK_WEBHOOK_URL         — Slack incoming webhook (optional; skip if unset)
+# Required GitHub Variables (non-sensitive):
+#   GCP_PROJECT_ID            — olist-analytics-01
+#   GCS_BUCKET_NAME           — olist-bucket-01
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC = 14:00 SGT = 02:00 EST, matches Dagster schedule
+  workflow_dispatch:
+    inputs:
+      full_pipeline:
+        description: "Include raw data re-ingestion (downloads CSVs from GCS, runs DQ + Meltano)"
+        type: boolean
+        default: false
+
+# Never cancel a running pipeline — a partial BigQuery state is worse than
+# a queued run. Concurrent triggers queue and run one at a time.
+concurrency:
+  group: olist-daily-pipeline
+  cancel-in-progress: false
+
+jobs:
+
+  # ── Job 1 (conditional): Ingest — only when full_pipeline is true ──────────
+  # Downloads raw CSVs from GCS, validates them with the Python DQ layer,
+  # applies star schema DDL, then loads via Meltano ELT.
+  # Skipped on cron runs and when full_pipeline = false.
+  ingest:
+    name: "Ingest: DQ Validation + Meltano ELT"
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event_name == 'workflow_dispatch' && inputs.full_pipeline == true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK (gsutil)
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Raw CSVs are never committed to git (see .gitignore: data/raw/*.csv).
+      # They live in GCS and are downloaded fresh for each full pipeline run.
+      - name: Download raw CSV data from GCS
+        run: |
+          mkdir -p data/raw
+          gsutil -m cp "gs://${{ vars.GCS_BUCKET_NAME }}/raw/*.csv" data/raw/
+          echo "Downloaded files:"
+          ls -lh data/raw/
+
+      # CRITICAL severity failures exit 1 and stop the job — matching the
+      # same blocking behaviour enforced in the Dagster Meltano asset.
+      - name: Run core DQ validation (57+ checks)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          DATA_DIR: data/raw/
+        run: python data_quality/dq_validation.py
+
+      - name: Run geolocation DQ validation (30 checks)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          DATA_DIR: data/raw/
+        run: python data_quality/dq_geolocation.py
+
+      # Apply (or re-apply) the star schema DDL to olist_analytics.
+      # CREATE OR REPLACE is idempotent — safe to run on every full pipeline run.
+      - name: Apply BigQuery star schema DDL
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: python scripts/run_schema.py
+
+      # Meltano ELT: tap-csv reads the downloaded CSVs, target-bigquery
+      # loads them into olist_raw. Matches the Meltano asset in Dagster.
+      - name: Run Meltano ELT (tap-csv → target-bigquery → olist_raw)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: meltano run tap-csv target-bigquery
+
+  # ── Job 2: dbt Staging Models ──────────────────────────────────────────────
+  # Rebuilds all 9 staging views and runs the 35+ staging schema tests.
+  # Runs when ingest succeeded OR was skipped (dbt-only mode).
+  # Blocked if ingest failed — prevents running dbt on stale/incomplete raw data.
+  dbt-staging:
+    name: "dbt: Run + Test Staging Models"
+    runs-on: ubuntu-latest
+    needs: [ingest]
+    environment: production
+    if: |
+      always() &&
+      needs.ingest.result != 'failure' &&
+      needs.ingest.result != 'cancelled'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      # --target prod uses 8 threads and interactive priority — appropriate
+      # for a scheduled production run (vs dev which uses 4 threads).
+      - name: Run staging models (9 views)
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt run --select tag:staging --profiles-dir profiles --target prod
+
+      # Failures here block mart execution — a staging test failure means
+      # the mart business logic will run on invalid inputs.
+      - name: Test staging models (35+ schema tests)
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt test --select tag:staging --profiles-dir profiles --target prod
+
+  # ── Job 3: dbt Mart Models ─────────────────────────────────────────────────
+  # Runs all 7 mart models and the 40+ mart schema tests.
+  # Blocked if staging tests failed.
+  dbt-marts:
+    name: "dbt: Run + Test Mart Models"
+    runs-on: ubuntu-latest
+    needs: [dbt-staging]
+    environment: production
+    if: needs.dbt-staging.result == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Run mart models (7 tables — full refresh + incremental)
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt run --select tag:mart --profiles-dir profiles --target prod
+
+      - name: Test mart models (40+ schema tests)
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt test --select tag:mart --profiles-dir profiles --target prod
+
+  # ── Job 4: SQL Integration Tests ───────────────────────────────────────────
+  # Runs the 6 cross-table SQL assertions in dbt_project/tests/.
+  # These are "singular tests" — each SQL file returns rows on failure.
+  # Blocked if any mart model or mart test failed.
+  integration-tests:
+    name: "SQL Integration Tests (6 assertions)"
+    runs-on: ubuntu-latest
+    needs: [dbt-marts]
+    environment: production
+    if: needs.dbt-marts.result == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      # test_type:singular selects all singular SQL test files from tests/.
+      # These 6 assertions verify cross-table referential integrity and
+      # business logic that dbt schema tests cannot express:
+      #   assert_no_orphaned_order_items
+      #   assert_payment_value_matches_order_value
+      #   assert_mart_row_counts_nonzero
+      #   assert_rfm_segments_cover_all_customers
+      #   assert_geo_coordinates_in_brazil
+      #   assert_no_future_orders
+      - name: Run 6 SQL integration assertions
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          dbt test \
+            --select "test_type:singular" \
+            --profiles-dir profiles \
+            --target prod
+
+  # ── Job 5: Pipeline Summary + Notifications ────────────────────────────────
+  # Always runs — collects results from all upstream jobs, writes a markdown
+  # summary to the GitHub Actions run page, and sends a Slack alert on failure.
+  notify:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [ingest, dbt-staging, dbt-marts, integration-tests]
+    if: always()
+
+    steps:
+      # Write a formatted run summary visible in the GitHub Actions UI under
+      # the workflow run → Summary tab.
+      - name: Write pipeline summary to GitHub Step Summary
+        run: |
+          echo "## Olist Daily Pipeline — $(date -u '+%Y-%m-%d %H:%M UTC')" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Trigger:** \`${{ github.event_name }}\`" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Stage | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Ingest (DQ + Meltano ELT) | \`${{ needs.ingest.result }}\` |" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "| dbt Staging (9 views + 35+ tests) | \`${{ needs.dbt-staging.result }}\` |" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "| dbt Marts (7 tables + 40+ tests)  | \`${{ needs.dbt-marts.result }}\` |" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "| SQL Integration Tests (6)         | \`${{ needs.integration-tests.result }}\` |" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "[View full run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      # Slack alert on any job failure. SLACK_WEBHOOK_URL is optional —
+      # if the secret is not configured the curl is simply skipped.
+      - name: Slack alert — pipeline failure
+        if: |
+          needs.ingest.result          == 'failure' ||
+          needs.dbt-staging.result     == 'failure' ||
+          needs.dbt-marts.result       == 'failure' ||
+          needs.integration-tests.result == 'failure'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"text\": \"❌ *Olist Daily Pipeline FAILED* — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\",
+                \"attachments\": [{
+                  \"color\": \"danger\",
+                  \"fields\": [
+                    {\"title\": \"Ingest\",             \"value\": \"${{ needs.ingest.result }}\",             \"short\": true},
+                    {\"title\": \"dbt Staging\",        \"value\": \"${{ needs.dbt-staging.result }}\",        \"short\": true},
+                    {\"title\": \"dbt Marts\",          \"value\": \"${{ needs.dbt-marts.result }}\",          \"short\": true},
+                    {\"title\": \"Integration Tests\",  \"value\": \"${{ needs.integration-tests.result }}\",  \"short\": true}
+                  ]
+                }]
+              }"
+          fi
+
+      # Slack confirmation on a clean run.
+      - name: Slack alert — pipeline success
+        if: |
+          (needs.ingest.result            == 'success' || needs.ingest.result            == 'skipped') &&
+          needs.dbt-staging.result        == 'success' &&
+          needs.dbt-marts.result          == 'success' &&
+          needs.integration-tests.result  == 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"text\": \"✅ *Olist Daily Pipeline completed successfully* — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"
+              }"
+          fi

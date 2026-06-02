@@ -1,0 +1,189 @@
+name: dbt CI — Slim Build on PR
+
+# Triggered only on PRs targeting main where dbt models or data quality
+# scripts changed. Skipped entirely for PRs that touch only docs, notebooks,
+# or orchestration code — no point running BigQuery jobs for those.
+#
+# Requires GitHub Secrets (Settings → Secrets and variables → Actions):
+#   GCP_SERVICE_ACCOUNT_KEY   — full JSON content of olist-analytics-gcp-key.json
+# Requires GitHub Variables (not encrypted):
+#   GCP_PROJECT_ID            — olist-analytics-01
+#   GCS_BUCKET_NAME           — olist-bucket-01
+#
+# How slim CI works:
+#   1. dbt-compile  — compiles all SQL against BigQuery (strictest SQL validation),
+#                     tries to fetch the previous production manifest from GCS,
+#                     uploads the freshly compiled manifest for the next PR.
+#   2. dbt-slim-build  — if a previous manifest exists:
+#                        runs `dbt build --select state:modified+`
+#                        builds and tests ONLY the models changed in this PR
+#                        and all models downstream of them.
+#   3. dbt-staging-fallback — if no previous manifest (first ever run):
+#                             falls back to the full staging build instead.
+#
+# The environment: bigquery-ci gate ensures an admin must approve before
+# secrets are exposed to code from a fork — protecting credentials.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "dbt_project/**"
+      - "data_quality/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ── Job 1: Compile all SQL against live BigQuery ───────────────────────────
+  dbt-compile:
+    name: Compile & Validate SQL
+    runs-on: ubuntu-latest
+    environment: bigquery-ci
+
+    # Passes the manifest-found flag to downstream jobs so they know
+    # whether slim CI (state:modified+) or full fallback should run.
+    outputs:
+      has_previous_state: ${{ steps.fetch_state.outputs.found }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      # google-github-actions/auth sets GOOGLE_APPLICATION_CREDENTIALS
+      # automatically — profiles.yml picks it up via env_var().
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      # Attempt to download the previous manifest from GCS.
+      # The manifest was uploaded by the last successful compile (step below).
+      # On the very first run this file won't exist — that's handled gracefully.
+      - name: Fetch previous production manifest (slim CI baseline)
+        id: fetch_state
+        run: |
+          mkdir -p /tmp/dbt-state
+          if gsutil cp \
+               "gs://${{ vars.GCS_BUCKET_NAME }}/dbt-state/manifest.json" \
+               /tmp/dbt-state/manifest.json 2>/dev/null; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "Previous manifest found — slim CI (state:modified+) will run."
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No previous manifest — will fall back to full staging build."
+          fi
+
+      # dbt compile connects to BigQuery to resolve source schemas and validate
+      # SQL. This is the strictest validation possible without executing models:
+      # column references, function names, and JOIN keys are all verified.
+      - name: Compile all dbt models
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: dbt compile --profiles-dir profiles --target dev
+
+      # Store the freshly compiled manifest in GCS so that the NEXT PR can use
+      # it as the "previous state" baseline for state:modified+ selection.
+      - name: Upload manifest to GCS (next PR's slim CI baseline)
+        if: success()
+        run: |
+          gsutil cp \
+            dbt_project/target/manifest.json \
+            "gs://${{ vars.GCS_BUCKET_NAME }}/dbt-state/manifest.json"
+
+  # ── Job 2 (primary): Slim build — changed models + downstream ─────────────
+  # Runs when: a previous manifest was found in GCS.
+  # Builds and tests ONLY the models modified in this PR and their downstream
+  # dependents. Skips the 12–14 unrelated models entirely.
+  dbt-slim-build:
+    name: Slim Build (state:modified+)
+    runs-on: ubuntu-latest
+    needs: dbt-compile
+    environment: bigquery-ci
+    if: needs.dbt-compile.outputs.has_previous_state == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Download previous manifest
+        run: |
+          mkdir -p /tmp/dbt-state
+          gsutil cp \
+            "gs://${{ vars.GCS_BUCKET_NAME }}/dbt-state/manifest.json" \
+            /tmp/dbt-state/manifest.json
+
+      # state:modified+  = the changed model + ALL downstream dependents.
+      # Example: if mart_seller_performance.sql changed, this builds:
+      #   mart_seller_performance + stg_sellers + stg_order_items + stg_reviews
+      # and runs all tests defined on those models. The other 12 models are skipped.
+      - name: Build & test changed models and their downstream dependents
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          dbt build \
+            --select "state:modified+" \
+            --state /tmp/dbt-state \
+            --profiles-dir profiles \
+            --target dev
+
+  # ── Job 3 (fallback): Full staging build — no prior state available ────────
+  # Runs when: no previous manifest found in GCS (first run ever).
+  # Builds and tests all staging models as a safe substitute for slim CI.
+  # Once the first manifest is stored, this job will never run again.
+  dbt-staging-fallback:
+    name: Full Staging Build (first-run fallback)
+    runs-on: ubuntu-latest
+    needs: dbt-compile
+    environment: bigquery-ci
+    if: needs.dbt-compile.outputs.has_previous_state == 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Build & test all staging models
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          dbt build \
+            --select "tag:staging" \
+            --profiles-dir profiles \
+            --target dev

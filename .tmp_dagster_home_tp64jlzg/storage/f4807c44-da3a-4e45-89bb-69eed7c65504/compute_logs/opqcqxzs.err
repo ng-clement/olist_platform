@@ -1,0 +1,27 @@
+[32m2026-05-30 19:05:49 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4735 - LOGS_CAPTURED - Started capturing logs in process (pid: 4735).
+[32m2026-05-30 19:05:49 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4735 - dq_core_validation - STEP_START - Started execution of step "dq_core_validation".
+[32m2026-05-30 19:05:52 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - dq_core_validation - Loading datasets from: data/raw
+
+============================================================
+DATA QUALITY REPORT — 2026-05-30 11:05 UTC
+============================================================
+Total checks : 45
+Passed       : 45 (100.0%)
+Failed       : 0 (0.0%)
+============================================================
+
+Results saved to /home/jinava/olist_platform/logs/dq_results.csv
+
+[32m2026-05-30 19:05:52 +0800[0m - dagster - [34mWARNING[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - dq_core_validation -  INFO     | ✅ PASS | reviews.review_score | between | violations=0 (min=1, max=5)
+2026-05-30 19:05:52,539 | INFO     | ✅ PASS | mql.mql_id | not_null | null_rate=0.00% (threshold=0.0%)
+2026-05-30 19:05:52,540 | INFO     | ✅ PASS | mql.mql_id | unique | duplicate_count=0
+2026-05-30 19:05:52,541 | INFO     | ✅ PASS | mql.first_contact_date | not_null | null_rate=0.00% (threshold=0.0%)
+2026-05-30 19:05:52,541 | INFO     | ✅ PASS | mql.origin | not_null | null_rate=0.75% (threshold=1.0%)
+2026-05-30 19:05:52,542 | INFO     | ✅ PASS | closed_deals.mql_id | not_null | null_rate=0.00% (threshold=0.0%)
+2026-05-30 19:05:52,542 | INFO     | ✅ PASS | closed_deals.seller_id | not_null | null_rate=0.00% (threshold=0.0%)
+2026-05-30 19:05:52,544 | INFO     | ✅ PASS | closed_deals.mql_id | referential_integrity | orphaned_keys=0 in closed_deals.mql_id not in mql.mql_id
+2026-05-30 19:05:52,560 | INFO     | ✅ PASS | marketing_funnel.multiple | business_rule:won_after_contact | violations=1 (threshold=1)
+
+[32m2026-05-30 19:05:52 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4735 - dq_core_validation - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-30 19:05:52 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4735 - dq_core_validation - ASSET_MATERIALIZATION - Materialized value dq_core_validation.
+[32m2026-05-30 19:05:52 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4735 - dq_core_validation - STEP_SUCCESS - Finished execution of step "dq_core_validation" in 3.03s.

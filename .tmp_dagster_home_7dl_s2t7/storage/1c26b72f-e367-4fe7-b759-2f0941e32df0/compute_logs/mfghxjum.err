@@ -1,0 +1,20 @@
+[32m2026-05-29 16:41:35 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258535 - LOGS_CAPTURED - Started capturing logs in process (pid: 258535).
+[32m2026-05-29 16:41:35 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258535 - dq_geo_validation - STEP_START - Started execution of step "dq_geo_validation".
+[32m2026-05-29 16:41:44 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dq_geo_validation - 
+DQ report saved → /home/jinava/olist_platform/logs/dq_geolocation_report.json
+Pass rate: 93.3% | Pipeline proceed: True
+
+[32m2026-05-29 16:41:44 +0800[0m - dagster - [34mWARNING[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - dq_geo_validation - tal row count within [900K–1.1M] — PASS | 1,000,163 total rows (expected ~1,000,163)
+2026-05-29 16:41:43,810 [INFO] ✅ [GEO-25] Dedup ratio check (skipped) — PASS | No deduped df provided
+2026-05-29 16:41:44,041 [INFO] ✅ [GEO-26] City names are meaningful strings — PASS | 0 rows (0.000%) with suspicious city names
+2026-05-29 16:41:44,067 [INFO] ✅ [GEO-27] Lat 1%-99% IQR: <2% outliers — PASS | 19988 rows (2.00%) outside [-30.10,-2.50]
+2026-05-29 16:41:44,088 [INFO] ⚠️ [GEO-28] Lng 1%-99% IQR: <2% outliers — WARN | 20004 rows (2.00%) outside [-57.65,-34.94]
+2026-05-29 16:41:44,091 [INFO] ✅ [GEO-29] Lat std dev within [4–8]° — PASS | std=5.716° (Brazil ~5.7°)
+2026-05-29 16:41:44,095 [INFO] ✅ [GEO-30] Lng std dev within [3–6]° — PASS | std=4.270° (Brazil ~4.3°)
+2026-05-29 16:41:44,095 [INFO] ────────────────────────────────────────────────────────────
+2026-05-29 16:41:44,095 [INFO] SUMMARY: 28/30 passed | 2 warnings | 0 failures | 4.2s
+2026-05-29 16:41:44,095 [INFO] Pipeline proceed: ✅ YES
+
+[32m2026-05-29 16:41:44 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258535 - dq_geo_validation - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:41:44 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258535 - dq_geo_validation - ASSET_MATERIALIZATION - Materialized value dq_geo_validation.
+[32m2026-05-29 16:41:44 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 258535 - dq_geo_validation - STEP_SUCCESS - Finished execution of step "dq_geo_validation" in 6.37s.

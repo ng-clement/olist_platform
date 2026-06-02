@@ -1,0 +1,3 @@
+[32m2026-05-30 19:05:59 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 5346 - LOGS_CAPTURED - Started capturing logs in process (pid: 5346).
+[32m2026-05-30 19:05:59 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 5346 - meltano_core_extract_load - STEP_START - Started execution of step "meltano_core_extract_load".
+[32m2026-05-30 19:05:59 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - meltano_core_extract_load - Running: python ingestion/ingest_to_bigquery.py

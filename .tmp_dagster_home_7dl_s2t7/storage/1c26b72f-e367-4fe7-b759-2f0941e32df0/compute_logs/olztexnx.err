@@ -1,0 +1,45 @@
+[32m2026-05-29 16:41:48 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 259224 - LOGS_CAPTURED - Started capturing logs in process (pid: 259224).
+[32m2026-05-29 16:41:48 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 259224 - meltano_core_extract_load - STEP_START - Started execution of step "meltano_core_extract_load".
+[32m2026-05-29 16:41:48 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - meltano_core_extract_load - Running: python ingestion/ingest_to_bigquery.py
+[32m2026-05-29 16:42:43 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - meltano_core_extract_load -   olist-analytics-01.olist_raw
+2026-05-29 16:41:49,362 | INFO     | olist.ingestion |   Mode:      Full Refresh
+2026-05-29 16:41:49,362 | INFO     | olist.ingestion |   Dry run:   False
+2026-05-29 16:41:49,362 | INFO     | olist.ingestion | ============================================================
+2026-05-29 16:41:49,989 | INFO     | olist.ingestion | BigQuery client initialised for project: olist-analytics-01
+2026-05-29 16:41:49,989 | INFO     | olist.ingestion | Loading orders from olist_orders_dataset.csv
+2026-05-29 16:41:50,487 | INFO     | olist.ingestion |   Loaded 99441 rows × 10 cols
+2026-05-29 16:41:58,004 | INFO     | olist.ingestion |   ✅ Loaded 99441 rows → olist-analytics-01.olist_raw.raw_orders (7.5s)
+2026-05-29 16:41:58,004 | INFO     | olist.ingestion | Loading order_items from olist_order_items_dataset.csv
+2026-05-29 16:41:58,157 | INFO     | olist.ingestion |   Loaded 112650 rows × 9 cols
+2026-05-29 16:42:03,708 | INFO     | olist.ingestion |   ✅ Loaded 112650 rows → olist-analytics-01.olist_raw.raw_order_items (5.5s)
+2026-05-29 16:42:03,709 | INFO     | olist.ingestion | Loading customers from olist_customers_dataset.csv
+2026-05-29 16:42:03,824 | INFO     | olist.ingestion |   Loaded 99441 rows × 7 cols
+2026-05-29 16:42:09,345 | INFO     | olist.ingestion |   ✅ Loaded 99441 rows → olist-analytics-01.olist_raw.raw_customers (5.5s)
+2026-05-29 16:42:09,345 | INFO     | olist.ingestion | Loading products from olist_products_dataset.csv
+2026-05-29 16:42:09,366 | INFO     | olist.ingestion |   Loaded 32951 rows × 11 cols
+2026-05-29 16:42:16,527 | INFO     | olist.ingestion |   ✅ Loaded 32951 rows → olist-analytics-01.olist_raw.raw_products (7.2s)
+2026-05-29 16:42:16,528 | INFO     | olist.ingestion | Loading sellers from olist_sellers_dataset.csv
+2026-05-29 16:42:16,535 | INFO     | olist.ingestion |   Loaded 3095 rows × 6 cols
+2026-05-29 16:42:20,670 | INFO     | olist.ingestion |   ✅ Loaded 3095 rows → olist-analytics-01.olist_raw.raw_sellers (4.1s)
+2026-05-29 16:42:20,670 | INFO     | olist.ingestion | Loading payments from olist_order_payments_dataset.csv
+2026-05-29 16:42:20,735 | INFO     | olist.ingestion |   Loaded 103886 rows × 7 cols
+2026-05-29 16:42:25,426 | INFO     | olist.ingestion |   ✅ Loaded 103886 rows → olist-analytics-01.olist_raw.raw_order_payments (4.7s)
+2026-05-29 16:42:25,426 | INFO     | olist.ingestion | Loading reviews from olist_order_reviews_dataset.csv
+2026-05-29 16:42:25,627 | INFO     | olist.ingestion |   Loaded 99224 rows × 9 cols
+2026-05-29 16:42:33,159 | INFO     | olist.ingestion |   ✅ Loaded 99224 rows → olist-analytics-01.olist_raw.raw_order_reviews (7.5s)
+2026-05-29 16:42:33,160 | INFO     | olist.ingestion | Loading category_translation from product_category_name_translation.csv
+2026-05-29 16:42:33,163 | INFO     | olist.ingestion |   Loaded 71 rows × 4 cols
+2026-05-29 16:42:37,064 | INFO     | olist.ingestion |   ✅ Loaded 71 rows → olist-analytics-01.olist_raw.raw_category_translation (3.9s)
+2026-05-29 16:42:37,065 | INFO     | olist.ingestion | Loading mql from olist_marketing_qualified_leads_dataset.csv
+2026-05-29 16:42:37,082 | INFO     | olist.ingestion |   Loaded 8000 rows × 6 cols
+2026-05-29 16:42:40,552 | INFO     | olist.ingestion |   ✅ Loaded 8000 rows → olist-analytics-01.olist_raw.raw_marketing_qualified_leads (3.5s)
+2026-05-29 16:42:40,552 | INFO     | olist.ingestion | Loading closed_deals from olist_closed_deals_dataset.csv
+2026-05-29 16:42:40,561 | INFO     | olist.ingestion |   Loaded 842 rows × 16 cols
+2026-05-29 16:42:43,754 | INFO     | olist.ingestion |   ✅ Loaded 842 rows → olist-analytics-01.olist_raw.raw_closed_deals (3.2s)
+2026-05-29 16:42:43,758 | INFO     | olist.ingestion | ============================================================
+2026-05-29 16:42:43,758 | INFO     | olist.ingestion | INGESTION COMPLETE: 10 succeeded, 0 failed
+2026-05-29 16:42:43,758 | INFO     | olist.ingestion | ============================================================
+
+[32m2026-05-29 16:42:43 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 259224 - meltano_core_extract_load - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:42:44 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 259224 - meltano_core_extract_load - ASSET_MATERIALIZATION - Materialized value meltano_core_extract_load.
+[32m2026-05-29 16:42:44 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 259224 - meltano_core_extract_load - STEP_SUCCESS - Finished execution of step "meltano_core_extract_load" in 52.82s.

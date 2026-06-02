@@ -8,21 +8,21 @@ dependencies:
   - python=3.11.14
   - requests=2.32.5
   - pip:
-      - dagster==1.12.8
-      - dagster-dbt==0.28.8
-      - dagster-duckdb==0.28.8
-      - dagster-duckdb-pandas==0.28.8
-      - dagster-webserver==1.12.8
-      - dbt-bigquery==1.11.0  # dbt BigQuery adapter
-      - dbt-core==1.10.17    # dbt core
-      - duckdb==1.4.3
-      - google-cloud-bigquery==3.20.1  # BigQuery client for ingestion
-      - google-cloud-storage==3.1.1    # GCS archiving (>=3.0 for aiplatform, <3.2 for dbt-bigquery)
+      - dagster==1.13.6
+      - dagster-duckdb==0.29.6
+      - dagster-duckdb-pandas==0.29.6
+      - dagster-webserver==1.13.6
+      - dbt-bigquery==1.10.3         # BigQuery adapter; paired with dbt-core below
+      - dbt-core==1.10.9             # dbt core
+      - duckdb==1.5.3
+      - google-cloud-bigquery==3.41.0  # BigQuery client for ingestion
+      - google-cloud-storage==3.1.1    # GCS archiving (<3.2 required by dbt-bigquery)
       - jupyterlab==4.2.1              # notebook server
       - meltano==4.0.8
-      - numpy==1.26.4                  # numerical processing
+      - numpy==2.4.4                   # numpy 2.x — verified compatible with all deps
       - plotly==5.22.0                 # interactive charts
       - pymongo==4.7.3                 # MongoDB operational store
-      - python-dotenv==1.2.1
+      - python-dotenv==1.1.0
       - redis==5.0.4                   # Redis cache
       - seaborn==0.13.2                # statistical visualisation
+      - tqdm==4.67.3                   # progress bars

@@ -1,0 +1,30 @@
+[32m2026-05-29 16:42:53 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 261905 - LOGS_CAPTURED - Started capturing logs in process (pid: 261905).
+[32m2026-05-29 16:42:53 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 261905 - star_schema_build - STEP_START - Started execution of step "star_schema_build".
+[32m2026-05-29 16:43:48 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - star_schema_build -   ✅ DROP   DimDate                             (1.2s)
+  ✅ CREATE DimDate                             (2.1s)
+  ✅ DROP   DimGeography                        (1.0s)
+  ✅ CREATE DimGeography                        (3.4s)
+  ✅ DROP   DimCustomer                         (0.9s)
+  ✅ CREATE DimCustomer                         (3.1s)
+  ✅ DROP   DimProduct                          (1.0s)
+  ✅ CREATE DimProduct                          (2.5s)
+  ✅ DROP   DimSeller                           (1.2s)
+  ✅ CREATE DimSeller                           (2.3s)
+  ✅ DROP   DimPaymentType                      (1.0s)
+  ✅ CREATE DimPaymentType                      (2.4s)
+  ✅ DROP   DimMarketingChannel                 (1.0s)
+  ✅ CREATE DimMarketingChannel                 (2.4s)
+  ✅ DROP   FactOrders                          (1.0s)
+  ✅ CREATE FactOrders                          (12.4s)
+  ✅ DROP   FactOrderItems                      (1.1s)
+  ✅ CREATE FactOrderItems                      (8.3s)
+  ⚠️  DROP   FactMarketingFunnel                 QUOTA WARNING (table retained): 403 Quota exceeded: Your table exceeded quota for imports or query appends per t
+  ⚠️  CREATE FactMarketingFunnel                 QUOTA WARNING (table retained): 403 Quota exceeded: Your table exceeded quota for imports or query appends per t
+  ✅ DROP   FactPayments                        (1.0s)
+  ✅ CREATE FactPayments                        (3.2s)
+
+  Schema build complete — 20 statements, 0 errors, 2 quota warnings  (53.4s total)
+
+[32m2026-05-29 16:43:48 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 261905 - star_schema_build - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:43:48 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 261905 - star_schema_build - ASSET_MATERIALIZATION - Materialized value star_schema_build.
+[32m2026-05-29 16:43:48 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - 1c26b72f-e367-4fe7-b759-2f0941e32df0 - 261905 - star_schema_build - STEP_SUCCESS - Finished execution of step "star_schema_build" in 52.32s.

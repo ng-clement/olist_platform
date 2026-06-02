@@ -1,0 +1,9 @@
+[32m2026-05-29 16:51:59 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 285637 - LOGS_CAPTURED - Started capturing logs in process (pid: 285637).
+[32m2026-05-29 16:51:59 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 285637 - dbt_tests - STEP_START - Started execution of step "dbt_tests".
+[32m2026-05-29 16:51:59 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_tests - dbt test
+[32m2026-05-29 16:52:12 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_tests - Copying `/home/jinava/olist_platform/dbt_project/target/partial_parse.msgpack` to `/home/jinava/olist_platform/dbt_project/target/8ed0e00/partial_parse.msgpack` to take advantage of partial parsing.
+[32m2026-05-29 16:52:12 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_tests - Running dbt command: `dbt --no-use-colors test --target prod`.
+[32m2026-05-29 16:52:54 +0800[0m - dagster - [34mINFO[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - dbt_tests - Finished dbt command: `dbt --no-use-colors test --target prod`.
+[32m2026-05-29 16:52:54 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 285637 - dbt_tests - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-29 16:52:54 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 285637 - dbt_tests - ASSET_MATERIALIZATION - Materialized value dbt_tests.
+[32m2026-05-29 16:52:54 +0800[0m - dagster - [34mDEBUG[0m - olist_dbt_only - ba4a71c5-9a3a-4cf6-bab3-2199146aec4b - 285637 - dbt_tests - STEP_SUCCESS - Finished execution of step "dbt_tests" in 50.78s.

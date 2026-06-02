@@ -1,0 +1,19 @@
+# dagster.yaml — Dagster instance configuration
+# Place at the project root so `dagster dev` picks it up automatically.
+#
+# Launch Dagster UI (development):
+#   cd olist_platform
+#   conda activate olist
+#   DAGSTER_HOME=$(pwd) dagster dev -m orchestration.dagster
+#
+# Launch persistent daemon + webserver (production):
+#   cd olist_platform && conda activate olist
+#   DAGSTER_HOME=$(pwd) dagster-daemon run &
+#   DAGSTER_HOME=$(pwd) dagster-webserver -m orchestration.dagster -p 3000 &
+
+telemetry:
+  enabled: false
+
+storage:
+  sqlite:
+    base_dir: .dagster/storage

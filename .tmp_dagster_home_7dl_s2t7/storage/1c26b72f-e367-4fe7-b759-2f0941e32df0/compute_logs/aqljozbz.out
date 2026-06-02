@@ -1,0 +1,32 @@
+Running with dbt=1.10.17
+Registered adapter: bigquery=1.11.0
+Unable to do partial parsing because config vars, config profile, or config target have changed
+Unable to do partial parsing because profile has changed
+Found 16 models, 115 data tests, 11 sources, 665 macros
+
+Concurrency: 8 threads (target='prod')
+
+1 of 9 START sql view model olist_analytics_staging.stg_customers .............. [RUN]
+2 of 9 START sql table model olist_analytics_staging.stg_geolocation ........... [RUN]
+3 of 9 START sql view model olist_analytics_staging.stg_marketing_leads ........ [RUN]
+4 of 9 START sql view model olist_analytics_staging.stg_order_items ............ [RUN]
+5 of 9 START sql view model olist_analytics_staging.stg_orders ................. [RUN]
+6 of 9 START sql view model olist_analytics_staging.stg_payments ............... [RUN]
+7 of 9 START sql view model olist_analytics_staging.stg_products ............... [RUN]
+8 of 9 START sql view model olist_analytics_staging.stg_reviews ................ [RUN]
+6 of 9 OK created sql view model olist_analytics_staging.stg_payments .......... [CREATE VIEW (0 processed) in 1.96s]
+1 of 9 OK created sql view model olist_analytics_staging.stg_customers ......... [CREATE VIEW (0 processed) in 1.98s]
+7 of 9 OK created sql view model olist_analytics_staging.stg_products .......... [CREATE VIEW (0 processed) in 1.99s]
+3 of 9 OK created sql view model olist_analytics_staging.stg_marketing_leads ... [CREATE VIEW (0 processed) in 1.98s]
+5 of 9 OK created sql view model olist_analytics_staging.stg_orders ............ [CREATE VIEW (0 processed) in 1.98s]
+8 of 9 OK created sql view model olist_analytics_staging.stg_reviews ........... [CREATE VIEW (0 processed) in 1.98s]
+9 of 9 START sql view model olist_analytics_staging.stg_sellers ................ [RUN]
+4 of 9 OK created sql view model olist_analytics_staging.stg_order_items ....... [CREATE VIEW (0 processed) in 2.24s]
+9 of 9 OK created sql view model olist_analytics_staging.stg_sellers ........... [CREATE VIEW (0 processed) in 1.24s]
+2 of 9 OK created sql table model olist_analytics_staging.stg_geolocation ...... [CREATE TABLE (19.0k rows, 37.7 MiB processed) in 4.95s]
+
+Finished running 1 table model, 8 view models in 0 hours 0 minutes and 6.40 seconds (6.40s).
+
+Completed successfully
+
+Done. PASS=9 WARN=0 ERROR=0 SKIP=0 NO-OP=0 TOTAL=9

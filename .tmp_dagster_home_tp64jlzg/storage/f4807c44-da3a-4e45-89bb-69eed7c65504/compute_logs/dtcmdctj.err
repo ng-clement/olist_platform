@@ -1,0 +1,9 @@
+[32m2026-05-30 19:05:41 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4374 - LOGS_CAPTURED - Started capturing logs in process (pid: 4374).
+[32m2026-05-30 19:05:41 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4374 - bq_datasets_ready - STEP_START - Started execution of step "bq_datasets_ready".
+[32m2026-05-30 19:05:42 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - bq_datasets_ready - Dataset exists: olist_raw
+[32m2026-05-30 19:05:42 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - bq_datasets_ready - Dataset exists: olist_analytics
+[32m2026-05-30 19:05:43 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - bq_datasets_ready - Dataset exists: olist_analytics_staging
+[32m2026-05-30 19:05:43 +0800[0m - dagster - [34mINFO[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - bq_datasets_ready - Dataset exists: olist_analytics_marts
+[32m2026-05-30 19:05:43 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4374 - bq_datasets_ready - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-05-30 19:05:43 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4374 - bq_datasets_ready - ASSET_MATERIALIZATION - Materialized value bq_datasets_ready.
+[32m2026-05-30 19:05:43 +0800[0m - dagster - [34mDEBUG[0m - olist_daily_pipeline - f4807c44-da3a-4e45-89bb-69eed7c65504 - 4374 - bq_datasets_ready - STEP_SUCCESS - Finished execution of step "bq_datasets_ready" in 1.95s.

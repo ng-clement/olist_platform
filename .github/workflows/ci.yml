@@ -1,0 +1,115 @@
+name: CI — Code Quality & Validation
+
+# Runs on every push to any branch and on every PR targeting main.
+# No BigQuery credentials required — this workflow is safe to run everywhere.
+#
+# Jobs:
+#   lint        — ruff format + ruff check on Python source directories
+#   dbt-parse   — dbt parse validates SQL model syntax without a BigQuery connection
+#   security-scan — bandit scans Python source files for common security issues
+#
+# lint is a gate for dbt-parse (fail fast: if code style is broken, skip the
+# slower dbt install). security-scan runs in parallel with both.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on feature branches when new commits arrive,
+# preserving runner minutes. Never cancel on main — every push must be validated.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+
+  # ── Job 1: Lint ────────────────────────────────────────────────────────────
+  lint:
+    name: Lint Python
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      # ruff format --check exits non-zero if any file needs reformatting.
+      # Developers fix this locally with: ruff format data_quality/ orchestration/ ...
+      - name: Check code formatting (ruff format)
+        run: |
+          ruff format --check \
+            data_quality/ orchestration/ scripts/ notebooks/
+
+      # --output-format=github emits annotations directly in the PR diff view.
+      - name: Check linting rules (ruff check)
+        run: |
+          ruff check \
+            data_quality/ orchestration/ scripts/ notebooks/ \
+            --output-format=github
+
+  # ── Job 2: dbt Model Validation ───────────────────────────────────────────
+  dbt-parse:
+    name: Validate dbt Models
+    runs-on: ubuntu-latest
+    needs: lint  # skip if lint fails — no point parsing broken Python
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # Match pinned versions from requirements.txt exactly.
+      - name: Install dbt (BigQuery adapter)
+        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+
+      # dbt parse does NOT connect to BigQuery — it only parses SQL files and
+      # builds the in-memory manifest. We still need GCP_PROJECT_ID and
+      # GOOGLE_APPLICATION_CREDENTIALS set so profiles.yml env_var() calls
+      # resolve without error. A dummy credential JSON is sufficient.
+      - name: Create dummy GCP credentials
+        run: |
+          echo '{"type":"service_account","project_id":"ci-placeholder"}' \
+            > /tmp/ci-creds.json
+
+      - name: Parse dbt project (SQL syntax, no BigQuery connection)
+        working-directory: dbt_project
+        env:
+          GCP_PROJECT_ID: ci-placeholder
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/ci-creds.json
+        run: dbt parse --profiles-dir profiles
+
+  # ── Job 3: Security Scan ───────────────────────────────────────────────────
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    # Runs in parallel with lint and dbt-parse — independent concern.
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install bandit
+        run: pip install "bandit[toml]"
+
+      # --severity-level medium: flag MEDIUM and HIGH issues, skip LOW noise.
+      # Scans only project source directories — excludes third-party packages.
+      - name: Scan Python source files
+        run: |
+          bandit -r \
+            data_quality/ orchestration/ scripts/ notebooks/ \
+            --severity-level medium \
+            --quiet
