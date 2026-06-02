@@ -1,21 +1,10 @@
-name: Deploy — Dashboard & Docs to GitHub Pages
+name: Deploy — Dashboard to GitHub Pages
 
-# Fires only when presentation-layer files change on main.
-# Deploying on every push (regardless of what changed) would waste runner
-# minutes and create noisy deployment history for code-only changes.
+# Fires only when dashboard files change on main.
 #
 # What gets deployed:
 #   dashboard/index.html + dashboard/charts_data.js
 #     → https://<user>.github.io/<repo>/
-#         The live executive BI dashboard — served as the root page.
-#
-#   docs/platform_architecture.html
-#     → https://<user>.github.io/<repo>/architecture.html
-#         Platform architecture & design decisions reference doc (v3.0).
-#
-#   docs/dagster_orchestration.html
-#     → https://<user>.github.io/<repo>/dagster.html
-#         Dagster orchestration deep-dive (companion to architecture.html).
 #
 # No BigQuery credentials needed — this workflow only copies static files.
 # Authentication uses the built-in GITHUB_TOKEN scoped to Pages.
@@ -28,21 +17,13 @@ on:
     branches: [main]
     paths:
       - "dashboard/**"
-      - "docs/platform_architecture.html"
-      - "docs/dagster_orchestration.html"
+  workflow_dispatch:  # allows manual trigger from GitHub Actions tab
 
-# Scoped permissions — only what GitHub Pages deployment requires.
-# contents:read  — checkout the repository
-# pages:write    — deploy to GitHub Pages
-# id-token:write — OIDC token for the deploy-pages action
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# For Pages, a newer deploy always supersedes an older queued one.
-# cancel-in-progress: true is the GitHub-recommended setting here —
-# the opposite of the data pipeline (where partial state is dangerous).
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -52,10 +33,6 @@ jobs:
   deploy:
     name: Build & Deploy to GitHub Pages
     runs-on: ubuntu-latest
-
-    # The environment block wires the live URL into the GitHub Deployments UI.
-    # After a successful run, the URL appears as a clickable link on the
-    # repository homepage under "Deployments".
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -63,50 +40,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Assemble the static site in _site/.
-      # Structure:
-      #   _site/
-      #   ├── index.html          ← dashboard (root page)
-      #   ├── charts_data.js      ← chart data for the dashboard
-      #   ├── architecture.html   ← platform_architecture.html (renamed)
-      #   └── dagster.html        ← dagster_orchestration.html (renamed)
       - name: Assemble static site
         run: |
           mkdir -p _site
-
-          # Dashboard — copied as-is; index.html becomes the root page
           cp dashboard/index.html    _site/index.html
           cp dashboard/charts_data.js _site/charts_data.js
-
-          # Architecture & orchestration docs — renamed for clean URLs
-          cp docs/platform_architecture.html  _site/architecture.html
-          cp docs/dagster_orchestration.html  _site/dagster.html
-
           echo "Site contents:"
           ls -lh _site/
 
-      # Configure Pages — reads repository settings and prepares the
-      # upload endpoint. Required before upload-pages-artifact.
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      # Package _site/ into a Pages artifact. The artifact is a tar archive
-      # that GitHub Pages extracts on its CDN edge nodes.
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site/
 
-      # Deploy the uploaded artifact. Sets deployment.outputs.page_url
-      # which is used by the environment.url field above.
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # Print the live URL to the workflow log for easy access.
-      - name: Print live URLs
-        run: |
-          BASE="${{ steps.deployment.outputs.page_url }}"
-          echo "Dashboard     : ${BASE}"
-          echo "Architecture  : ${BASE}architecture.html"
-          echo "Dagster docs  : ${BASE}dagster.html"
+      - name: Print live URL
+        run: echo "Dashboard live at ${{ steps.deployment.outputs.page_url }}"
