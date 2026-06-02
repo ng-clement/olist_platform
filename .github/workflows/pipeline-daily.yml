@@ -172,7 +172,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [dbt-staging]
     environment: production
-    if: needs.dbt-staging.result == 'success'
+    if: always() && needs.dbt-staging.result == 'success'
 
     steps:
       - uses: actions/checkout@v4
@@ -217,7 +217,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [dbt-marts]
     environment: production
-    if: needs.dbt-marts.result == 'success'
+    if: always() && needs.dbt-marts.result == 'success'
 
     steps:
       - uses: actions/checkout@v4
