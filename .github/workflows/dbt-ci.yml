@@ -67,6 +67,12 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      # setup-gcloud activates the service account for gsutil.
+      # auth@v2 alone sets GOOGLE_APPLICATION_CREDENTIALS but gsutil
+      # requires the Cloud SDK to be explicitly configured with those creds.
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       # Attempt to download the previous manifest from GCS.
       # The manifest was uploaded by the last successful compile (step below).
       # On the very first run this file won't exist — that's handled gracefully.
@@ -135,6 +141,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Download previous manifest
         run: |
           mkdir -p /tmp/dbt-state
@@ -189,6 +198,9 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Install dbt package dependencies
         working-directory: dbt_project
