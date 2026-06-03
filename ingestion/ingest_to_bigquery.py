@@ -246,6 +246,13 @@ class BigQueryLoader:
             logger.info("  [DRY RUN] Would load %d rows → %s", len(df), full_table)
             result = {"table": full_table, "rows": len(df), "status": "dry_run"}
         elif self._bq_ok and self.client:
+            # Remap Python bool values in object columns to strings so BigQuery
+            # creates STRING columns — matching the schema tap-csv/Meltano produces
+            # for the same tables (Singer CSV taps always emit string types).
+            df = df.copy()
+            for col in df.select_dtypes(include="object").columns:
+                if df[col].map(lambda x: isinstance(x, bool)).any():
+                    df[col] = df[col].map(lambda x: str(x) if isinstance(x, bool) else x)
             job_config = self.bq.LoadJobConfig(
                 write_disposition=write_disposition, autodetect=True)
             job = self.client.load_table_from_dataframe(df, full_table, job_config=job_config)

@@ -1,25 +1,25 @@
 name: Daily Pipeline — Full Olist ELT
 
-# Primary orchestrator for this pipeline is Dagster (olist_daily_at_0600_utc
-# schedule, 06:00 UTC). This workflow serves two purposes:
+# GitHub Actions is the primary orchestrator for this pipeline.
+# Dagster is available for manual/local runs only (DefaultScheduleStatus.STOPPED).
 #
-#   1. Fallback cron — fires at the same time (06:00 UTC) if the Dagster
-#      daemon is not running (e.g. local dev machine is off).
-#   2. Manual trigger — workflow_dispatch lets anyone run the pipeline on demand
-#      from the GitHub Actions UI, with an optional full re-ingestion mode.
+# Two automatic cron triggers:
+#
+#   1. 02:00 SGT (18:00 UTC) — FULL pipeline
+#      Downloads raw CSVs from GCS, runs DQ validation, ingests to BigQuery,
+#      applies star schema DDL, runs dbt staging → marts → integration tests → notify.
+#
+#   2. 06:00 SGT (22:00 UTC) — DBT-ONLY refresh (fallback/secondary)
+#      Skips raw ingest. Assumes data already in BigQuery.
+#      Runs: dbt staging → dbt marts → integration tests → notify.
+#      Useful if the 02:00 SGT run succeeded but a dbt re-run is needed later.
+#
+#   3. Manual trigger (workflow_dispatch)
+#      full_pipeline = true  → same as the 02:00 SGT cron (full pipeline)
+#      full_pipeline = false → same as the 06:00 SGT cron (dbt only)
 #
 # The 5 jobs are strictly sequential. Each job blocks the next on failure,
 # mirroring the CRITICAL-exit DQ layer in the local pipeline run.
-#
-# Pipeline modes (controlled by workflow_dispatch input):
-#   full_pipeline = false (default, used by cron)
-#     → Assumes raw data already in BigQuery.
-#       Runs: dbt staging → dbt marts → integration tests → notify
-#
-#   full_pipeline = true (manual only)
-#     → Downloads raw CSVs from GCS, runs Python DQ validation,
-#       applies star schema DDL, runs Meltano ELT, then continues
-#       with dbt staging → marts → integration tests → notify.
 #
 # Required GitHub Secrets:
 #   GCP_SERVICE_ACCOUNT_KEY   — full JSON of olist-analytics-gcp-key.json
@@ -30,11 +30,12 @@ name: Daily Pipeline — Full Olist ELT
 
 on:
   schedule:
-    - cron: "0 6 * * *"   # 06:00 UTC = 14:00 SGT = 02:00 EST, matches Dagster schedule
+    - cron: "0 18 * * *"   # 02:00 SGT (18:00 UTC) — full pipeline including ingest
+    - cron: "0 22 * * *"   # 06:00 SGT (22:00 UTC) — dbt-only fallback/refresh
   workflow_dispatch:
     inputs:
       full_pipeline:
-        description: "Include raw data re-ingestion (downloads CSVs from GCS, runs DQ + Meltano)"
+        description: "Include raw data re-ingestion (downloads CSVs from GCS, runs DQ + ingest)"
         type: boolean
         default: false
 
@@ -46,15 +47,20 @@ concurrency:
 
 jobs:
 
-  # ── Job 1 (conditional): Ingest — only when full_pipeline is true ──────────
-  # Downloads raw CSVs from GCS, validates them with the Python DQ layer,
-  # applies star schema DDL, then loads via Meltano ELT.
-  # Skipped on cron runs and when full_pipeline = false.
+  # ── Job 1 (conditional): Ingest — full pipeline runs only ───────────────────
+  # Runs on:
+  #   • 02:00 SGT cron (18:00 UTC) — primary daily full pipeline
+  #   • workflow_dispatch with full_pipeline = true — manual full run
+  # Skipped on:
+  #   • 06:00 SGT cron (22:00 UTC) — dbt-only refresh
+  #   • workflow_dispatch with full_pipeline = false
   ingest:
-    name: "Ingest: DQ Validation + Meltano ELT"
+    name: "Ingest: DQ Validation + Python ingestion scripts"
     runs-on: ubuntu-latest
     environment: production
-    if: github.event_name == 'workflow_dispatch' && inputs.full_pipeline == true
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 18 * * *') ||
+      (github.event_name == 'workflow_dispatch' && inputs.full_pipeline == true)
 
     steps:
       - uses: actions/checkout@v4

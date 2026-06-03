@@ -50,6 +50,7 @@ data/warehouse_sim/
 
 # ── Logs & reports ────────────────────────────────────────────────────────────
 logs/
+.tmp_dagster*/
 *.log
 reports/charts/*.png
 reports/charts/*.svg

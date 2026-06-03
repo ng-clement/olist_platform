@@ -18,34 +18,34 @@ plugins:
         files:
           - entity: raw_orders
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_orders_dataset.csv
-            keys: [order_id]
+            keys: []
           - entity: raw_order_items
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_order_items_dataset.csv
-            keys: [order_id, order_item_id]
+            keys: []
           - entity: raw_customers
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_customers_dataset.csv
-            keys: [customer_id]
+            keys: []
           - entity: raw_products
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_products_dataset.csv
-            keys: [product_id]
+            keys: []
           - entity: raw_sellers
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_sellers_dataset.csv
-            keys: [seller_id]
+            keys: []
           - entity: raw_order_payments
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_order_payments_dataset.csv
-            keys: [order_id, payment_sequential]
+            keys: []
           - entity: raw_order_reviews
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_order_reviews_dataset.csv
-            keys: [review_id]
+            keys: []
           - entity: raw_marketing_qualified_leads
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_marketing_qualified_leads_dataset.csv
-            keys: [mql_id]
+            keys: []
           - entity: raw_closed_deals
             path: $MELTANO_PROJECT_ROOT/data/raw/olist_closed_deals_dataset.csv
-            keys: [mql_id]
+            keys: []
           - entity: raw_category_translation
             path: $MELTANO_PROJECT_ROOT/data/raw/product_category_name_translation.csv
-            keys: [product_category_name]
+            keys: []
 
   # ── Loader: adswerve target-bigquery (fully working as of 2026-06-03)
   # Fix: pin numpy<2.0 (pyarrow 10.0.1 needs NumPy 1.x) and set location: US
