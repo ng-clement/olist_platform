@@ -5,7 +5,7 @@ SELECT
     payment_sequential,
     payment_type,
     payment_installments,
-    ROUND(payment_value, 2) AS payment_value,
+    ROUND(SAFE_CAST(payment_value AS FLOAT64), 2) AS payment_value,
     CURRENT_TIMESTAMP()     AS _stg_loaded_at
 FROM {{ source('olist_raw', 'order_payments') }}
 WHERE payment_type != 'not_defined'

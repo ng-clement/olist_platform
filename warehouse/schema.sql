@@ -204,15 +204,18 @@ SELECT
   p.product_id,
   p.product_category_name,
   COALESCE(t.product_category_name_english, p.product_category_name, 'Unknown') AS category_english,
-  p.product_name_lenght         AS product_name_length,
-  p.product_description_lenght  AS product_description_length,
-  p.product_photos_qty,
-  p.product_weight_g,
-  p.product_length_cm,
-  p.product_height_cm,
-  p.product_width_cm,
+  SAFE_CAST(p.product_name_lenght        AS INT64)   AS product_name_length,
+  SAFE_CAST(p.product_description_lenght AS INT64)   AS product_description_length,
+  SAFE_CAST(p.product_photos_qty         AS INT64)   AS product_photos_qty,
+  SAFE_CAST(p.product_weight_g           AS FLOAT64) AS product_weight_g,
+  SAFE_CAST(p.product_length_cm          AS FLOAT64) AS product_length_cm,
+  SAFE_CAST(p.product_height_cm          AS FLOAT64) AS product_height_cm,
+  SAFE_CAST(p.product_width_cm           AS FLOAT64) AS product_width_cm,
   ROUND(
-    p.product_length_cm * p.product_height_cm * p.product_width_cm / 1000000, 4
+    SAFE_CAST(p.product_length_cm AS FLOAT64)
+    * SAFE_CAST(p.product_height_cm AS FLOAT64)
+    * SAFE_CAST(p.product_width_cm  AS FLOAT64)
+    / 1000000, 4
   )                              AS volume_litres,
   CURRENT_TIMESTAMP()            AS dw_inserted_at
 FROM `olist_raw.raw_products` p
@@ -349,9 +352,9 @@ AS
 WITH order_payments AS (
   SELECT
     order_id,
-    SUM(payment_value)                                              AS total_payment_value,
-    MAX(payment_installments)                                       AS max_installments,
-    ARRAY_AGG(payment_type ORDER BY payment_value DESC LIMIT 1)[OFFSET(0)]
+    SUM(SAFE_CAST(payment_value        AS FLOAT64))                  AS total_payment_value,
+    MAX(SAFE_CAST(payment_installments AS INT64))                    AS max_installments,
+    ARRAY_AGG(payment_type ORDER BY SAFE_CAST(payment_value AS FLOAT64) DESC LIMIT 1)[OFFSET(0)]
                                                                     AS primary_payment_type
   FROM `olist_raw.raw_order_payments`
   WHERE payment_type != 'not_defined'
@@ -361,9 +364,9 @@ order_items_agg AS (
   SELECT
     order_id,
     COUNT(*)                           AS item_count,
-    SUM(price)                         AS product_revenue,
-    SUM(freight_value)                 AS freight_revenue,
-    SUM(price + freight_value)         AS total_order_value,
+    SUM(SAFE_CAST(price         AS FLOAT64))                         AS product_revenue,
+    SUM(SAFE_CAST(freight_value AS FLOAT64))                         AS freight_revenue,
+    SUM(SAFE_CAST(price AS FLOAT64) + SAFE_CAST(freight_value AS FLOAT64)) AS total_order_value,
     COUNT(DISTINCT seller_id)          AS seller_count,
     COUNT(DISTINCT product_id)         AS distinct_products
   FROM `olist_raw.raw_order_items`
@@ -372,7 +375,7 @@ order_items_agg AS (
 order_reviews AS (
   SELECT
     order_id,
-    MAX(review_score) AS review_score
+    MAX(SAFE_CAST(review_score AS INT64)) AS review_score
   FROM `olist_raw.raw_order_reviews`
   GROUP BY order_id
 )
@@ -444,9 +447,9 @@ SELECT
   oi.product_id,
   oi.seller_id,
   DATE(oi.shipping_limit_date)                     AS shipping_limit_date,
-  ROUND(oi.price, 2)                               AS item_price,
-  ROUND(oi.freight_value, 2)                       AS freight_value,
-  ROUND(oi.price + oi.freight_value, 2)            AS item_total,
+  ROUND(SAFE_CAST(oi.price         AS FLOAT64), 2)  AS item_price,
+  ROUND(SAFE_CAST(oi.freight_value AS FLOAT64), 2)  AS freight_value,
+  ROUND(SAFE_CAST(oi.price AS FLOAT64) + SAFE_CAST(oi.freight_value AS FLOAT64), 2) AS item_total,
   p.category_english                               AS product_category,
   p.product_weight_g,
   s.state_code                                     AS seller_state,
@@ -483,7 +486,7 @@ SELECT
   d.lead_type,
   d.lead_behaviour_profile,
   d.business_type,
-  COALESCE(d.declared_monthly_revenue, 0)          AS declared_monthly_revenue,
+  COALESCE(SAFE_CAST(d.declared_monthly_revenue AS FLOAT64), 0) AS declared_monthly_revenue,
   CASE WHEN d.seller_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_converted,
   DATE_DIFF(DATE(d.won_date), DATE(m.first_contact_date), DAY) AS days_to_close,
   CURRENT_TIMESTAMP()                              AS dw_inserted_at
@@ -506,7 +509,7 @@ SELECT
   p.payment_sequential,
   p.payment_type,
   p.payment_installments,
-  ROUND(p.payment_value, 2)                        AS payment_value,
+  ROUND(SAFE_CAST(p.payment_value AS FLOAT64), 2)   AS payment_value,
   o.purchase_date,
   o.customer_state,
   o.order_status,
