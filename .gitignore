@@ -12,7 +12,6 @@ olist-analytics-gcp-key.json
 *-key.json
 *-credentials.json
 service_account*.json
-docs/
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
@@ -56,6 +55,8 @@ reports/charts/*.png
 reports/charts/*.svg
 
 # ── OS & editor ──────────────────────────────────────────────────────────────
+CLAUDE.md
+docs/
 .DS_Store
 Thumbs.db
 .vscode/settings.json
@@ -66,6 +67,12 @@ Thumbs.db
 *.Zone.Identifier
 *.docx
 *.pdf
+
+# ── Dagster runtime (SQLite state — changes every run) ───────────────────────
+.dagster/
+
+# ── Meltano runtime (SQLite state — not meltano.yml) ─────────────────────────
+.meltano/
 
 # ── Airflow ───────────────────────────────────────────────────────────────────
 airflow_home/

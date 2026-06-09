@@ -150,7 +150,7 @@ jobs:
           cache: pip
 
       - name: Install dbt (BigQuery adapter)
-        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+        run: pip install "dbt-core==1.10.17" "dbt-bigquery==1.11.0"
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -198,7 +198,7 @@ jobs:
           cache: pip
 
       - name: Install dbt (BigQuery adapter)
-        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+        run: pip install "dbt-core==1.10.17" "dbt-bigquery==1.11.0"
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -243,7 +243,7 @@ jobs:
           cache: pip
 
       - name: Install dbt (BigQuery adapter)
-        run: pip install "dbt-core==1.10.9" "dbt-bigquery==1.10.3"
+        run: pip install "dbt-core==1.10.17" "dbt-bigquery==1.11.0"
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
