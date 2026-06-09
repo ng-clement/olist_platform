@@ -77,8 +77,7 @@ olist_platform/
 ├── scripts/
 │   ├── run_schema.py               # Apply warehouse/schema.sql DDL to BigQuery
 │   ├── setup_bigquery.sh           # Creates BQ datasets + applies IAM bindings
-│   ├── check_bq_datasets.py        # Pre-flight: verify required datasets exist
-│   └── build_slides.py             # Generates olist_platform_slides.pptx
+│   └── check_bq_datasets.py        # Pre-flight: verify required datasets exist
 │
 ├── notebooks/
 │   └── olist_analysis.py           # Full analytics notebook (jupytext format)
