@@ -498,7 +498,7 @@ svg text { font-family: 'Segoe UI', system-ui, sans-serif; }
   <div class="nav-foot">
     <div class="nav-prog"><div class="nav-fill"></div></div>
     <div class="nav-count">1 / 10</div>
-    <a href="../../olist_platform/index.html" class="nav-back">← Dashboard</a>
+    <a href="#" onclick="goToDashboard(); return false;" class="nav-back">← Dashboard</a>
   </div>
 </nav>
 
@@ -1312,6 +1312,15 @@ document.addEventListener('touchend',   e => {
   if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
   tx = null;
 });
+
+function goToDashboard() {
+  const p = window.location.pathname;
+  if (p.includes('/docs/htmlpptx/')) {
+    window.location.href = '../../dashboard/index.html';
+  } else {
+    window.location.href = 'index.html';
+  }
+}
 </script>
 </body>
 </html>
