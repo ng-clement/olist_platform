@@ -119,6 +119,15 @@ body {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
 }
+.nav-back {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; margin-top: 10px; padding: 8px 0; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 600; color: var(--steel);
+  text-decoration: none;
+  background: var(--ltblue); border: 1px solid var(--border);
+  transition: background .15s, color .15s;
+}
+.nav-back:hover { background: #d4e8f7; color: var(--navy); }
 .nav-prog {
   height: 4px; background: var(--border);
   border-radius: 2px; margin-bottom: 8px; overflow: hidden;
@@ -489,6 +498,7 @@ svg text { font-family: 'Segoe UI', system-ui, sans-serif; }
   <div class="nav-foot">
     <div class="nav-prog"><div class="nav-fill"></div></div>
     <div class="nav-count">1 / 10</div>
+    <a href="../../dashboard/index.html" class="nav-back">← Dashboard</a>
   </div>
 </nav>
 
